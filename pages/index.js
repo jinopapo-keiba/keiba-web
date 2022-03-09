@@ -25,33 +25,41 @@ function normalizeTimes(times){
 }
 
 export async function getServerSideProps(context) {
-  const response = await fetch("http://localhost:8080/v1/raceResult/bestTime?stadium=%E4%B8%AD%E5%B1%B1&raceLength=2000&raceId=69")
-  const json = await response.json();
-  const fullTimes = normalizeTimes(json.bestRaceTimes.map(bestRaceTime => bestRaceTime.fullTime))
-  const lastRapTimes = normalizeTimes(json.bestRaceTimes.map(bestRaceTime => bestRaceTime.lastRapTime))
-  const stadiumFullTimes = normalizeTimes(json.bestRaceTimes.map(bestRaceTime => bestRaceTime.stadiumFullTime))
-  const stadiumLastRapTimes = normalizeTimes(json.bestRaceTimes.map(bestRaceTime => bestRaceTime.stadiumLastRapTime))
-  const horses = json.bestRaceTimes.map(bestRaceTime => bestRaceTime.horse.name)
+  const minResponse = await fetch("http://localhost:8080/v1/raceResult/bestTime?stadium=%E4%B8%AD%E5%B1%B1&raceLength=2000&raceId=69")
+  const minJson = await minResponse.json();
+  const minFullTimes = normalizeTimes(minJson.bestRaceTimes.map(bestRaceTime => bestRaceTime.fullTime))
+  const minLastRapTimes = normalizeTimes(minJson.bestRaceTimes.map(bestRaceTime => bestRaceTime.lastRapTime))
+  const avgResponse = await fetch("http://localhost:8080/v1/raceResult/bestTime?stadium=%E4%B8%AD%E5%B1%B1&raceLength=2000&raceId=69&summaryType=AVG")
+  const avgJson = await avgResponse.json();
+  const avgFullTimes = normalizeTimes(avgJson.bestRaceTimes.map(bestRaceTime => bestRaceTime.fullTime))
+  const avgLastRapTimes = normalizeTimes(avgJson.bestRaceTimes.map(bestRaceTime => bestRaceTime.lastRapTime))
+  const horses = minJson.bestRaceTimes.map(bestRaceTime => { 
+    return {
+      name: bestRaceTime.raceHorse.horse.name,
+      frameNumber: bestRaceTime.raceHorse.frameNumber
+    }
+  })
+
   return {
     props: {
-      fullTimes: fullTimes.normalizedTimes,
-      minFullTime: fullTimes.minTime,
-      lastRapTimes: lastRapTimes.normalizedTimes,
-      minLastRapTime: lastRapTimes.minTime,
-      stadiumFullTime: stadiumFullTimes.normalizedTimes,
-      minStadiumFullTime: stadiumFullTimes.minTime,
-      stadiumLastRapTimes: stadiumLastRapTimes.normalizedTimes,
-      minStadiumLastRapTimes: stadiumLastRapTimes.minTime,
+      minFullTimes: minFullTimes.normalizedTimes,
+      minMinFullTime: minFullTimes.minTime,
+      minLastRapTimes: minLastRapTimes.normalizedTimes,
+      minMinLastRapTime: minLastRapTimes.minTime,
+      avgFullTimes: avgFullTimes.normalizedTimes,
+      minAvgFullTime: avgFullTimes.minTime,
+      avgLastRapTimes: avgLastRapTimes.normalizedTimes,
+      minAvgLastRapTime: avgLastRapTimes.minTime,
       horses: horses
     }
   }
 }
 
 export default function Home(props) {
-  const horse = [];
-  for( let i = 0; i < props.horses.length; i++){
-    horse.push(<tr><td>{i}</td><td>{props.horses[i]}</td></tr>)
-  }
+  const horses = [];
+  props.horses.forEach(
+    horse => horses.push(<tr><td>{horse.frameNumber}</td><td>{horse.name}</td></tr>)
+  )
   return (
     <dev>
       <Head>
@@ -72,26 +80,23 @@ export default function Home(props) {
         <Container>
           <Row>
             <Col>
-              <TimeChart title="同距離同会場最速フルタイム" data={props.stadiumFullTime} dataMin={props.minStadiumFullTime}></TimeChart>
+              <TimeChart title="同距離同会場最速フルタイム" data={props.minFullTimes} dataMin={props.minFullTimes.minTime}></TimeChart>
             </Col>
             <Col>
-              <TimeChart title="同距離同会場最速上がり" data={props.stadiumLastRapTimes} dataMin={props.minStadiumLastRapTimes} ></TimeChart>
+              <TimeChart title="同距離同会場最速上がり" data={props.minLastRapTimes} dataMin={props.minMinLastRapTime} ></TimeChart>
             </Col>
           </Row>
         </Container>
-
         <Container>
           <Row>
             <Col>
-              <TimeChart title="同距離最速フルタイム" data={props.fullTimes} dataMin={props.minFullTime}></TimeChart>
+              <TimeChart title="同距離同会場平均フルタイム" data={props.minFullTimes} dataMin={props.minFullTimes.minTime}></TimeChart>
             </Col>
             <Col>
-              <TimeChart title="同距離最速上がり" data={props.lastRapTimes} dataMin={props.minLastRapTime} ></TimeChart>
+              <TimeChart title="同距離同会場平均上がり" data={props.minLastRapTimes} dataMin={props.minMinLastRapTime} ></TimeChart>
             </Col>
           </Row>
         </Container>
-
-
         <Container>
           <Table>
             <thead>
@@ -101,7 +106,7 @@ export default function Home(props) {
               </tr>
             </thead>
             <tbody>
-              {horse}
+              {horses}
             </tbody>
           </Table>
         </Container>
