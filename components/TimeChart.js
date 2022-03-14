@@ -9,9 +9,11 @@ export default function TimeChart(props) {
                     <BarChart width={150} height={100} data={props.data}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <YAxis label={{ value: "秒", position: 'insideLeft' }} domain={[props.dataMin, 'dataMax']} width={80}/>
-                        <XAxis />
+                        <XAxis  dataKey="name"/>
                         <Tooltip />
-                        <Bar dataKey="time" fill="#8884d8" />
+                        <Legend />
+                        <Bar dataKey="avg" fill="#472BAB" />
+                        <Bar dataKey="min" fill="#4E7CDF" />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
