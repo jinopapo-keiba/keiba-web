@@ -6,24 +6,10 @@ import styles from '../styles/Home.module.css'
 import TimeChart from '../components/TimeChart'
 import StadiumRepository from '../repository/StadiumRepository';
 import Link from 'next/link';
+import BestTimeRepository from '../repository/BestTimeRepository';
 
-function normalizeTimes(times){
-  const normalizedTimes = times.map(time => time/1000)
-  let minTime =  Number.MAX_SAFE_INTEGER
-  normalizedTimes.forEach(
-    time => {
-      if(time !== 0){
-        minTime = Math.min(minTime,time - 0.3)
-      }
-    }
-  )
-  return {
-    minTime: minTime,
-    normalizedTimes: normalizedTimes
-  }
-}
 
-function convertTimes(horses,minFullTimes,avgFullTimes,minLastRapTimes,avgLastRapTimes){
+function convertTimes(horses,minFullTimes,avgFullTimes,minLastRapTimes,avgLastRapTimes,count){
   const fullTimes = []
   const lastRapTimes = []
   const minFullTime = Math.min(minFullTimes.minTime,avgFullTimes.minTime)
@@ -33,7 +19,8 @@ function convertTimes(horses,minFullTimes,avgFullTimes,minLastRapTimes,avgLastRa
       {
         name: horses[i].name,
         min: minFullTimes.normalizedTimes[i] === 0 ? minFullTime.toFixed(1) : minFullTimes.normalizedTimes[i].toFixed(1),
-        avg: avgFullTimes.normalizedTimes[i] === 0 ? minFullTime.toFixed(1) : avgFullTimes.normalizedTimes[i].toFixed(1)
+        avg: avgFullTimes.normalizedTimes[i] === 0 ? minFullTime.toFixed(1) : avgFullTimes.normalizedTimes[i].toFixed(1),
+        count: count[i]
       }
     )
     lastRapTimes.push(
@@ -41,6 +28,7 @@ function convertTimes(horses,minFullTimes,avgFullTimes,minLastRapTimes,avgLastRa
         name: horses[i].name,
         min: minLastRapTimes.normalizedTimes[i] === 0 ? minLastRapTime.toFixed(1) : minLastRapTimes.normalizedTimes[i].toFixed(1),
         avg: avgLastRapTimes.normalizedTimes[i] === 0 ? minLastRapTime.toFixed(1) : avgLastRapTimes.normalizedTimes[i].toFixed(1),
+        count: count[i]
       }
     )
   }
@@ -48,7 +36,7 @@ function convertTimes(horses,minFullTimes,avgFullTimes,minLastRapTimes,avgLastRa
     minFullTime: minFullTime,
     fullTimes: fullTimes,
     minLastRapTime: minLastRapTime,
-    lastRapTimes: lastRapTimes
+    lastRapTimes: lastRapTimes,
   }
 }
 
@@ -60,44 +48,33 @@ export async function getServerSideProps(context) {
   const stadium = context.query.stadium ? context.query.stadium : races[0].stadium
   
   
-  const minResponse = await fetch(`http://localhost:8080/v1/raceResult/bestTime?raceLength=${length}&raceId=${raceId}`)
-  const minJson = await minResponse.json();
-  const minFullTimes = normalizeTimes(minJson.bestRaceTimes.map(bestRaceTime => bestRaceTime.fullTime))
-  const minLastRapTimes = normalizeTimes(minJson.bestRaceTimes.map(bestRaceTime => bestRaceTime.lastRapTime))
-  const avgResponse = await fetch(`http://localhost:8080/v1/raceResult/bestTime?raceLength=${length}&raceId=${raceId}&summaryType=AVG`)
-  const avgJson = await avgResponse.json();
-  const avgFullTimes = normalizeTimes(avgJson.bestRaceTimes.map(bestRaceTime => bestRaceTime.fullTime))
-  const avgLastRapTimes = normalizeTimes(avgJson.bestRaceTimes.map(bestRaceTime => bestRaceTime.lastRapTime))
-  const minShortResponse = await fetch(`http://localhost:8080/v1/raceResult/bestTime?stadium=${stadium}&raceLength=${length}&raceId=${raceId}`)
-  const minShortJson = await minShortResponse.json();
-  const minShortFullTimes = normalizeTimes(minShortJson.bestRaceTimes.map(bestRaceTime => bestRaceTime.fullTime))
-  const minShortLastRapTimes = normalizeTimes(minShortJson.bestRaceTimes.map(bestRaceTime => bestRaceTime.lastRapTime))
-  const avgShortResponse = await fetch(`http://localhost:8080/v1/raceResult/bestTime?stadium=${stadium}&raceLength=${length}&raceId=${raceId}&summaryType=AVG`)
-  const avgShortJson = await avgShortResponse.json();
-  const avgShortFullTimes = normalizeTimes(avgShortJson.bestRaceTimes.map(bestRaceTime => bestRaceTime.fullTime))
-  const avgShortLastRapTimes = normalizeTimes(avgShortJson.bestRaceTimes.map(bestRaceTime => bestRaceTime.lastRapTime))
-  const horses = minJson.bestRaceTimes.map(bestRaceTime => { 
-    return {
-      name: bestRaceTime.raceHorse.horse.name,
-      frameNumber: bestRaceTime.raceHorse.frameNumber
-    }
-  })
+  const minTimes = await BestTimeRepository.fetchBestTime(length,raceId)
+  const avgTimes = await BestTimeRepository.fetchBestTime(length,raceId,"AVG")
+  const stadiumMinTimes =  await BestTimeRepository.fetchBestTime(length,raceId,null,stadium)
+  const stadiumAvgTimes =  await BestTimeRepository.fetchBestTime(length,raceId,"AVG",stadium)
 
-  const {minFullTime,fullTimes,minLastRapTime,lastRapTimes} = convertTimes(horses,minFullTimes,avgFullTimes,minLastRapTimes,avgLastRapTimes)
-  const shotTime = convertTimes(horses,minShortFullTimes,avgShortFullTimes,minShortLastRapTimes,avgShortLastRapTimes)
+  const times = convertTimes(
+    minTimes.horses,
+    minTimes.fullTimes,
+    avgTimes.fullTimes,
+    minTimes.lastRapTimes,
+    avgTimes.lastRapTimes,
+    minTimes.counts)
+  const stadiumTimes = convertTimes(
+    stadiumMinTimes.horses,
+    stadiumMinTimes.fullTimes,
+    stadiumAvgTimes.fullTimes,
+    stadiumMinTimes.lastRapTimes,
+    stadiumAvgTimes.lastRapTimes,
+    stadiumMinTimes.counts)
+
   const ranStadiums = await StadiumRepository.fetchRanStadium(raceId,length)
 
   return {
     props: {
-      fullTimes: fullTimes,
-      minFullTime: minFullTime,
-      lastRapTimes: lastRapTimes,
-      minLastRapTime: minLastRapTime,
-      minShortFullTime: shotTime.minFullTime,
-      shortFullTimes: shotTime.fullTimes,
-      minShortLastRapTime: shotTime.minLastRapTime,
-      lastShortRapTimes: shotTime.lastRapTimes,
-      horses: horses,
+      times: times,
+      stadiumTimes: stadiumTimes,
+      horses: minTimes.horses,
       races: races,
       ranStadiums: ranStadiums,
       stadium: stadium,
@@ -111,9 +88,9 @@ export default function Home(props) {
   const horses = []
   const races = []
   const stadiums = []
-  props.horses.forEach(
-    horse => horses.push(<tr><td>{horse.frameNumber}</td><td>{horse.name}</td></tr>)
-  )
+  for(let i=0; i < props.horses.length; i++){
+    horses.push(<tr><td>{props.horses[i].frameNumber}</td><td>{props.horses[i].name}</td><td>{props.times.lastRapTimes[i].count}</td><td>{props.stadiumTimes.lastRapTimes[i].count}</td></tr>)
+  }
   props.races.forEach(
     race => races.push(<Link href={`?raceId=${race.id}&length=${race.raceLength}&stadium=${race.stadium}`} passHref><Dropdown.Item>{race.raceName}</Dropdown.Item></Link>)
   )
@@ -164,20 +141,20 @@ export default function Home(props) {
         <Container>
           <Row>
             <Col>
-              <TimeChart title="同距離同会場フルタイム" data={props.fullTimes} dataMin={props.minFullTime}></TimeChart>
+              <TimeChart title="同距離同会場フルタイム" data={props.times.fullTimes} dataMin={props.times.minFullTime}></TimeChart>
             </Col>
             <Col>
-              <TimeChart title="同距離同会場上がり" data={props.lastRapTimes} dataMin={props.minLastRapTime} ></TimeChart>
+              <TimeChart title="同距離同会場上がり" data={props.times.lastRapTimes} dataMin={props.times.minLastRapTime} ></TimeChart>
             </Col>
           </Row>
         </Container>
         <Container>
           <Row>
             <Col>
-              <TimeChart title={`同距離${props.stadium}フルタイム`} data={props.shortFullTimes} dataMin={props.minShortFullTime}></TimeChart>
+              <TimeChart title={`同距離${props.stadium}フルタイム`} data={props.stadiumTimes.fullTimes} dataMin={props.stadiumTimes.minFullTime}></TimeChart>
             </Col>
             <Col>
-              <TimeChart title={`同距離${props.stadium}上がり`} data={props.lastShortRapTimes} dataMin={props.minShortLastRapTime} ></TimeChart>
+              <TimeChart title={`同距離${props.stadium}上がり`} data={props.stadiumTimes.lastRapTimes} dataMin={props.stadiumTimes.minLastRapTime} ></TimeChart>
             </Col>
           </Row>
         </Container>
@@ -187,6 +164,8 @@ export default function Home(props) {
               <tr>
                 <th>枠</th>
                 <th>馬名</th>
+                <th>同距離同会場出走数</th>
+                <th>同距離{props.stadium}出走数</th>
               </tr>
             </thead>
             <tbody>
