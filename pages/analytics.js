@@ -1,56 +1,121 @@
+import Head from 'next/head'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { ButtonGroup, Col, Dropdown, Navbar, Row, Table, Container } from 'react-bootstrap';
 
-export async function getServerSideProps(context) {
-    const raceLength = context.query.length
-    const noneResponsePromise = fetch(`http://localhost:8080/v1/raceResult/stadiumSummary?raceLength=${raceLength}&grade=none`)
-    const g3ResponsePromise =  fetch(`http://localhost:8080/v1/raceResult/stadiumSummary?raceLength=${raceLength}&grade=G3`)
-    const g2ResponsePromise =  fetch(`http://localhost:8080/v1/raceResult/stadiumSummary?raceLength=${raceLength}&grade=G2`)
-    const g1ResponsePromise =  fetch(`http://localhost:8080/v1/raceResult/stadiumSummary?raceLength=${raceLength}&grade=G1`)
+async function fetchResult(raceLength,time){
+    const noneResponsePromise = fetch(`http://localhost:8080/v1/raceResult/stadiumSummary?raceLength=${raceLength}&grade=none&time=${time}`)
+    const g3ResponsePromise =  fetch(`http://localhost:8080/v1/raceResult/stadiumSummary?raceLength=${raceLength}&grade=G3&time=${time}`)
+    const g2ResponsePromise =  fetch(`http://localhost:8080/v1/raceResult/stadiumSummary?raceLength=${raceLength}&grade=G2&time=${time}`)
+    const g1ResponsePromise =  fetch(`http://localhost:8080/v1/raceResult/stadiumSummary?raceLength=${raceLength}&grade=G1&time=${time}`)
     const [noneResponse, g3Response, g2Response, g1Response] = 
         await Promise.all([noneResponsePromise, g3ResponsePromise, g2ResponsePromise, g1ResponsePromise])
     const [noneJson, g3Json, g2Json, g1Json] = 
         await Promise.all([noneResponse.json(), g3Response.json(), g2Response.json(), g1Response.json()])
 
-    const fullTimes = []
+    const times = []
+    let min = Number.MAX_VALUE
     for(let i=0; i < noneJson.length; i++){
         const noneTime = noneJson[noneJson.findIndex(data => data.name === noneJson[i].name)]
         const g3Time = g3Json[g3Json.findIndex(data => data.name === noneJson[i].name)]
         const g2Time = g2Json[g2Json.findIndex(data => data.name === noneJson[i].name)]
         const g1Time = g1Json[g1Json.findIndex(data => data.name === noneJson[i].name)]
+        if (noneTime) {
+            min = Math.min(min, noneTime.time)
+        }
+        if (g3Time) {
+            min = Math.min(min, g3Time.time)
+        }
+        if (g2Time) {
+            min = Math.min(min, g2Time.time)
+        }
+        if (g1Time) {
+            min = Math.min(min, g1Time.time)
+        }
 
-        fullTimes.push(
+        times.push(
             {
                 name: noneJson[i].name,
-                noneTime: noneTime ? (noneTime.time/1000).toFixed(1) : 0,
-                g3Time: g3Time ? (g3Time.time/1000).toFixed(1) : 0,
-                g2Time: g2Time ? (g2Time.time/1000).toFixed(1) : 0,
-                g1Time: g1Time ? (g1Time.time/1000).toFixed(1) : 0
+                noneTime: noneTime ? noneTime.time : 0,
+                g3Time: g3Time ? g3Time.time : 0,
+                g2Time: g2Time ? g2Time.time : 0,
+                g1Time: g1Time ? g1Time.time : 0
             }
         )
     }
+
+    min -= 1000
+    return {
+        times: times.map((time) => {
+            time.noneTime = (Math.max(time.noneTime,min)/1000).toFixed(1)
+            time.g3Time = (Math.max(time.g3Time,min)/1000).toFixed(1)
+            time.g2Time = (Math.max(time.g2Time,min)/1000).toFixed(1)
+            time.g1Time = (Math.max(time.g1Time,min)/1000).toFixed(1)
+            return time
+        }),
+        min: min
+    }
+}
+
+export async function getServerSideProps(context) {
+    const raceLength = context.query.length
+
+    const fullTimes = await fetchResult(raceLength,"fullTime")
+    const lastRapTimes = await fetchResult(raceLength,"lastRapTime")
     return {
         props: {
-            fullTimes: fullTimes
+            fullTimes: fullTimes.times,
+            fullTimeMin: fullTimes.min,
+            lastRapTimes: lastRapTimes.times,
+            lastRapTimeMin: lastRapTimes.min,
         }
     }
 }
 
 export default function Analytics(props) {
     return (
-        <div style={{ height: "300px", width: "100%" }}>
-            <ResponsiveContainer width="100%" height="100%">
-                <BarChart width={150} height={100} data={props.fullTimes}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <YAxis label={{ value: "秒", position: 'insideLeft' }} width={80} />
-                    <XAxis dataKey="name" />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="noneTime" fill="#472BAB" />
-                    <Bar dataKey="g3Time" fill="#4E7CDF" />
-                    <Bar dataKey="g2Time" fill="#7e6ac4" />
-                    <Bar dataKey="g1Time" fill="#83a3e8" />
-                </BarChart>
-            </ResponsiveContainer>
-        </div>
+        <dev>
+        <Head>
+          <title>Umaaaaaa</title>
+          <meta name="description" content="Generated by create next app" />
+          <link rel="icon" href="/favicon.ico" />
+          <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous"></link>
+            </Head>
+            <Container>
+                <h1>グレード別フルタイム</h1>
+                <div style={{ height: "300px", width: "100%" }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart width={150} height={100} data={props.fullTimes}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <YAxis label={{ value: "秒", position: 'insideLeft' }} width={80} domain={[props.fullTimeMin, 'dataMax']} />
+                            <XAxis dataKey="name" />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="noneTime" fill="#472BAB" />
+                            <Bar dataKey="g3Time" fill="#4E7CDF" />
+                            <Bar dataKey="g2Time" fill="#7e6ac4" />
+                            <Bar dataKey="g1Time" fill="#83a3e8" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </Container>
+            <Container>
+                <h1>グレード別上がり</h1>
+                <div style={{ height: "300px", width: "100%" }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart width={150} height={100} data={props.lastRapTimes}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <YAxis label={{ value: "秒", position: 'insideLeft' }} width={80} domain={[props.lastRapTimeMin, 'dataMax']} />
+                            <XAxis dataKey="name" />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="noneTime" fill="#472BAB" />
+                            <Bar dataKey="g3Time" fill="#4E7CDF" />
+                            <Bar dataKey="g2Time" fill="#7e6ac4" />
+                            <Bar dataKey="g1Time" fill="#83a3e8" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </Container>
+        </dev>
     )
 }

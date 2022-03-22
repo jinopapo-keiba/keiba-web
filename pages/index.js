@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Container from 'react-bootstrap/Container';
-import { ButtonGroup, Card, Col, Dropdown, Navbar, NavbarBrand, Row, Table } from 'react-bootstrap';
+import { ButtonGroup, Col, Dropdown, Navbar, Row, Table } from 'react-bootstrap';
 import styles from '../styles/Home.module.css'
 import TimeChart from '../components/TimeChart'
 import StadiumRepository from '../repository/StadiumRepository';
@@ -105,13 +105,7 @@ export default function Home(props) {
         <link rel="icon" href="/favicon.ico" />
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous"></link>
       </Head>
-      <header>
-        <Navbar bg="dark" expand="md" variant="dark">
-          <Container style={{padding: "0"}}>
-            <Navbar.Brand href="#home">Umaaaaaa</Navbar.Brand>
-          </Container>
-        </Navbar>
-      </header>
+
 
       <main>
         <Container>
