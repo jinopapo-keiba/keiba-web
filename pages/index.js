@@ -46,12 +46,14 @@ export async function getServerSideProps(context) {
   const raceId = context.query.raceId ? context.query.raceId : races[0].id
   const length = context.query.length ? context.query.length : races[0].raceLength
   const stadium = context.query.stadium ? context.query.stadium : races[0].stadium
+  const raceName = context.query.raceId ? races.find(race => race.id === Number(raceId)).raceName : races[0].raceName
+  const raceCondition = context.query.raceCondition ? context.query.raceCondition : "良"
+
   
-  
-  const minTimes = await BestTimeRepository.fetchBestTime(length,raceId)
-  const avgTimes = await BestTimeRepository.fetchBestTime(length,raceId,"AVG")
-  const stadiumMinTimes =  await BestTimeRepository.fetchBestTime(length,raceId,null,stadium)
-  const stadiumAvgTimes =  await BestTimeRepository.fetchBestTime(length,raceId,"AVG",stadium)
+  const minTimes = await BestTimeRepository.fetchBestTime(length,raceId,null,raceCondition)
+  const avgTimes = await BestTimeRepository.fetchBestTime(length,raceId,"AVG",null,raceCondition)
+  const stadiumMinTimes =  await BestTimeRepository.fetchBestTime(length,raceId,null,stadium,raceCondition)
+  const stadiumAvgTimes =  await BestTimeRepository.fetchBestTime(length,raceId,"AVG",stadium,raceCondition)
 
   const times = convertTimes(
     minTimes.horses,
@@ -79,7 +81,9 @@ export async function getServerSideProps(context) {
       ranStadiums: ranStadiums,
       stadium: stadium,
       length: length,
-      raceId: raceId
+      raceId: raceId,
+      raceCondition: raceCondition,
+      raceName: raceName
     }
   }
 }
@@ -89,7 +93,14 @@ export default function Home(props) {
   const races = []
   const stadiums = []
   for(let i=0; i < props.horses.length; i++){
-    horses.push(<tr><td>{props.horses[i].frameNumber}</td><td>{props.horses[i].name}</td><td>{props.times.lastRapTimes[i].count}</td><td>{props.stadiumTimes.lastRapTimes[i].count}</td></tr>)
+    horses.push
+    (<tr>
+      <td>{props.horses[i].frameNumber}</td>
+      <td>{props.horses[i].name}</td>
+      <td>{props.times.lastRapTimes[i].count}</td>
+      <td>{props.stadiumTimes.lastRapTimes[i].count}</td>
+      <td>{props.times.lastRapTimes[i].min}</td>
+    </tr>)
   }
   props.races.forEach(
     race => races.push(<Link href={`?raceId=${race.id}&length=${race.raceLength}&stadium=${race.stadium}`} passHref><Dropdown.Item>{race.raceName}</Dropdown.Item></Link>)
@@ -112,7 +123,7 @@ export default function Home(props) {
         <ButtonGroup>
           <Dropdown>
             <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-              レース選択
+              {props.raceName}
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
@@ -128,6 +139,28 @@ export default function Home(props) {
 
             <Dropdown.Menu>
               {stadiums}
+            </Dropdown.Menu>
+          </Dropdown>
+        </ButtonGroup>
+        <ButtonGroup>
+          <Dropdown>
+            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+              {props.raceCondition}
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.stadium}&raceCondition=良`} passHref>
+                <Dropdown.Item>良</Dropdown.Item>
+              </Link>
+              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.stadium}&raceCondition=稍重`} passHref>
+                <Dropdown.Item>稍重</Dropdown.Item>
+              </Link>
+              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.stadium}&raceCondition=重`} passHref>
+                <Dropdown.Item>重</Dropdown.Item>
+              </Link>
+              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.stadium}&raceCondition=不良`} passHref>
+                <Dropdown.Item>不良</Dropdown.Item>
+              </Link>
             </Dropdown.Menu>
           </Dropdown>
         </ButtonGroup>
@@ -160,6 +193,7 @@ export default function Home(props) {
                 <th>馬名</th>
                 <th>同距離同会場出走数</th>
                 <th>同距離{props.stadium}出走数</th>
+                <th className='sortable'>同距離同会場上がり最速</th>
               </tr>
             </thead>
             <tbody>

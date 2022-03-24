@@ -15,7 +15,7 @@ class BestTimeRepository{
         }
     }
 
-    async fetchBestTime(length,raceId,summaryType,stadium){
+    async fetchBestTime(length,raceId,summaryType,stadium,raceCondition){
         const param = []
         if(length){
             param.push(`raceLength=${length}`)
@@ -29,6 +29,9 @@ class BestTimeRepository{
         if(summaryType){
             param.push(`summaryType=${summaryType}`)
         }
+        if(raceCondition){
+          param.push(`raceCondition=${raceCondition}`)
+      }
 
         const response = await fetch(`http://localhost:8080/v1/raceResult/bestTime?${param.join("&")}`)
         const json = await response.json();

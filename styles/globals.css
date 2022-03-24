@@ -18,3 +18,26 @@ a {
 .container {
   padding: 60px 15px 0;
 }
+
+.sortable {
+  cursor: pointer;
+  position: relative;
+}
+
+.sortable::before, .sortable::after {
+  content: "";
+  height: 8px;
+  width: 8px;
+  position: absolute;
+  border-top: 2px #888 solid;
+  border-right: 2px #888 solid;
+  right: 10px;
+  top: 50%;
+}
+
+.sortable::before {
+  transform: translateY(-8px) rotate(-45deg);
+}
+.sortable::after {
+  transform: translateY(2px) rotate(135deg);
+}
