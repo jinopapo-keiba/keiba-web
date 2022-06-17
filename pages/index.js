@@ -7,28 +7,33 @@ import TimeChart from '../components/TimeChart'
 import StadiumRepository from '../repository/StadiumRepository';
 import Link from 'next/link';
 import BestTimeRepository from '../repository/BestTimeRepository';
+import {convertColorByScore} from'../util/color';
 
 
-function convertTimes(horses,minFullTimes,avgFullTimes,minLastRapTimes,avgLastRapTimes,count){
+function convertTimes(minTimes,avgTimes){
   const fullTimes = []
   const lastRapTimes = []
-  const minFullTime = Math.min(minFullTimes.minTime,avgFullTimes.minTime)
-  const minLastRapTime = Math.min(minLastRapTimes.minTime,avgLastRapTimes.minTime)
-  for(let i=0; i < horses.length; i++){
+  const minFullTime = Math.min(minTimes.fullTimes.minTime,avgTimes.fullTimes.minTime)
+  const minLastRapTime = Math.min(minTimes.lastRapTimes.minTime,avgTimes.lastRapTimes.minTime)
+  for(let i=0; i < minTimes.horses.length; i++){
     fullTimes.push(
       {
-        name: horses[i].name,
-        min: minFullTimes.normalizedTimes[i] === 0 ? minFullTime.toFixed(1) : minFullTimes.normalizedTimes[i].toFixed(1),
-        avg: avgFullTimes.normalizedTimes[i] === 0 ? minFullTime.toFixed(1) : avgFullTimes.normalizedTimes[i].toFixed(1),
-        count: count[i]
+        name: minTimes.horses[i].name,
+        min: minTimes.fullTimes.normalizedTimes[i] === 0 ? minFullTime.toFixed(1) : minTimes.fullTimes.normalizedTimes[i].toFixed(1),
+        avg: avgTimes.fullTimes.normalizedTimes[i] === 0 ? minFullTime.toFixed(1) : avgTimes.fullTimes.normalizedTimes[i].toFixed(1),
+        devMin: minTimes.devFullTimes[i].toFixed(1),
+        devAvg: avgTimes.devFullTimes[i].toFixed(1),
+        count: minTimes.counts[i]
       }
     )
     lastRapTimes.push(
       {
-        name: horses[i].name,
-        min: minLastRapTimes.normalizedTimes[i] === 0 ? minLastRapTime.toFixed(1) : minLastRapTimes.normalizedTimes[i].toFixed(1),
-        avg: avgLastRapTimes.normalizedTimes[i] === 0 ? minLastRapTime.toFixed(1) : avgLastRapTimes.normalizedTimes[i].toFixed(1),
-        count: count[i]
+        name: minTimes.horses[i].name,
+        min: minTimes.lastRapTimes.normalizedTimes[i] === 0 ? minLastRapTime.toFixed(1) : minTimes.lastRapTimes.normalizedTimes[i].toFixed(1),
+        avg: avgTimes.lastRapTimes.normalizedTimes[i] === 0 ? minLastRapTime.toFixed(1) : avgTimes.lastRapTimes.normalizedTimes[i].toFixed(1),
+        devMin: minTimes.devLastRapTimes[i].toFixed(1),
+        devAvg: avgTimes.devLastRapTimes[i].toFixed(1),
+        count: minTimes.counts[i]
       }
     )
   }
@@ -40,50 +45,51 @@ function convertTimes(horses,minFullTimes,avgFullTimes,minLastRapTimes,avgLastRa
   }
 }
 
+function convertResult(lastRapTime,fullTime){
+  return (
+    <td>
+      <ul>
+        <li>出走数:{lastRapTime.count}</li>
+        <li>フルタイム最速:<span style={convertColorByScore(fullTime.devMin)}>{fullTime.devMin}</span></li>
+        <li>フルタイム平均:<span style={convertColorByScore(fullTime.devAvg)}>{fullTime.devAvg}</span></li>
+        <li>上がり最速:<span style={convertColorByScore(lastRapTime.devMin)}>{lastRapTime.devMin}</span></li>
+        <li>上がり平均:<span style={convertColorByScore(lastRapTime.devAvg)}>{lastRapTime.devAvg}</span></li>
+      </ul>
+  </td>
+  )
+}
+
 export async function getServerSideProps(context) {
   const racesResponse = await fetch("http://localhost:8080/v1/race/before")
   const races = await racesResponse.json();
   const raceId = context.query.raceId ? context.query.raceId : races[0].id
   const length = context.query.length ? context.query.length : races[0].raceLength
-  const stadium = context.query.stadium ? context.query.stadium : races[0].stadium
+  const ranStadium = races[0].stadium
   const raceName = context.query.raceId ? races.find(race => race.id === Number(raceId)).raceName : races[0].raceName
   const raceCondition = context.query.raceCondition ? context.query.raceCondition : "良"
 
-  
-  const minTimes = await BestTimeRepository.fetchBestTime(length,raceId,null,raceCondition)
-  const avgTimes = await BestTimeRepository.fetchBestTime(length,raceId,"AVG",null,raceCondition)
-  const stadiumMinTimes =  await BestTimeRepository.fetchBestTime(length,raceId,null,stadium,raceCondition)
-  const stadiumAvgTimes =  await BestTimeRepository.fetchBestTime(length,raceId,"AVG",stadium,raceCondition)
-
-  const times = convertTimes(
-    minTimes.horses,
-    minTimes.fullTimes,
-    avgTimes.fullTimes,
-    minTimes.lastRapTimes,
-    avgTimes.lastRapTimes,
-    minTimes.counts)
-  const stadiumTimes = convertTimes(
-    stadiumMinTimes.horses,
-    stadiumMinTimes.fullTimes,
-    stadiumAvgTimes.fullTimes,
-    stadiumMinTimes.lastRapTimes,
-    stadiumAvgTimes.lastRapTimes,
-    stadiumMinTimes.counts)
 
   const ranStadiums = await StadiumRepository.fetchRanStadium(raceId,length)
+  let horses = [];
+  const stadiumTimes = []
+  for(let i = 0; i < ranStadiums.length; i++){
+      const minTimes = await BestTimeRepository.fetchBestTime(length,raceId,null,ranStadiums[i],raceCondition)
+      const avgTimes = await BestTimeRepository.fetchBestTime(length,raceId,"AVG",ranStadiums[i],raceCondition)
+      horses = minTimes.horses
+      stadiumTimes.push(convertTimes(minTimes,avgTimes))
+  }
 
   return {
     props: {
-      times: times,
       stadiumTimes: stadiumTimes,
-      horses: minTimes.horses,
+      horses: horses,
       races: races,
       ranStadiums: ranStadiums,
-      stadium: stadium,
+      ranStadium: ranStadium,
       length: length,
       raceId: raceId,
       raceCondition: raceCondition,
-      raceName: raceName
+      raceName: raceName,
     }
   }
 }
@@ -93,14 +99,16 @@ export default function Home(props) {
   const races = []
   const stadiums = []
   for(let i=0; i < props.horses.length; i++){
-    horses.push
-    (<tr>
-      <td>{props.horses[i].frameNumber}</td>
-      <td>{props.horses[i].name}</td>
-      <td>{props.times.lastRapTimes[i].count}</td>
-      <td>{props.stadiumTimes.lastRapTimes[i].count}</td>
-      <td>{props.times.lastRapTimes[i].min}</td>
-    </tr>)
+    horses.push(
+      <tr>
+        <td>{props.horses[i].frameNumber}</td>
+        <td>{props.horses[i].name}</td>
+        {
+          props.stadiumTimes.map(
+            (times) => times.fullTimes[i].count === 0 ? (<td>出走なし</td>) : (<td>{convertResult(times.fullTimes[i],times.lastRapTimes[i])}</td>)
+          )
+        }
+      </tr>)
   }
   props.races.forEach(
     race => races.push(<Link href={`?raceId=${race.id}&length=${race.raceLength}&stadium=${race.stadium}`} passHref><Dropdown.Item>{race.raceName}</Dropdown.Item></Link>)
@@ -134,31 +142,20 @@ export default function Home(props) {
         <ButtonGroup>
           <Dropdown>
             <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-              競技場選択
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu>
-              {stadiums}
-            </Dropdown.Menu>
-          </Dropdown>
-        </ButtonGroup>
-        <ButtonGroup>
-          <Dropdown>
-            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
               {props.raceCondition}
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
-              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.stadium}&raceCondition=良`} passHref>
+              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.ranStadium}&raceCondition=良`} passHref>
                 <Dropdown.Item>良</Dropdown.Item>
               </Link>
-              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.stadium}&raceCondition=稍重`} passHref>
+              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.ranStadium}&raceCondition=稍重`} passHref>
                 <Dropdown.Item>稍重</Dropdown.Item>
               </Link>
-              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.stadium}&raceCondition=重`} passHref>
+              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.ranStadium}&raceCondition=重`} passHref>
                 <Dropdown.Item>重</Dropdown.Item>
               </Link>
-              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.stadium}&raceCondition=不良`} passHref>
+              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.ranStadium}&raceCondition=不良`} passHref>
                 <Dropdown.Item>不良</Dropdown.Item>
               </Link>
             </Dropdown.Menu>
@@ -168,20 +165,10 @@ export default function Home(props) {
         <Container>
           <Row>
             <Col>
-              <TimeChart title="同距離同会場フルタイム" data={props.times.fullTimes} dataMin={props.times.minFullTime}></TimeChart>
+              <TimeChart title={`${props.ranStadium}フルタイム`} data={props.stadiumTimes[0].fullTimes} dataMin={props.stadiumTimes[0].minFullTime}></TimeChart>
             </Col>
             <Col>
-              <TimeChart title="同距離同会場上がり" data={props.times.lastRapTimes} dataMin={props.times.minLastRapTime} ></TimeChart>
-            </Col>
-          </Row>
-        </Container>
-        <Container>
-          <Row>
-            <Col>
-              <TimeChart title={`同距離${props.stadium}フルタイム`} data={props.stadiumTimes.fullTimes} dataMin={props.stadiumTimes.minFullTime}></TimeChart>
-            </Col>
-            <Col>
-              <TimeChart title={`同距離${props.stadium}上がり`} data={props.stadiumTimes.lastRapTimes} dataMin={props.stadiumTimes.minLastRapTime} ></TimeChart>
+              <TimeChart title={`${props.ranStadium}上がり`} data={props.stadiumTimes[0].lastRapTimes} dataMin={props.stadiumTimes[0].minLastRapTime} ></TimeChart>
             </Col>
           </Row>
         </Container>
@@ -191,9 +178,9 @@ export default function Home(props) {
               <tr>
                 <th>枠</th>
                 <th>馬名</th>
-                <th>同距離同会場出走数</th>
-                <th>同距離{props.stadium}出走数</th>
-                <th className='sortable'>同距離同会場上がり最速</th>
+                {props.ranStadiums.map(
+                  (stadium) => (<th className='sortable'>{`${stadium}`}</th>)
+                )}
               </tr>
             </thead>
             <tbody>

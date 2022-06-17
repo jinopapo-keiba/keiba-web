@@ -47,6 +47,8 @@ class BestTimeRepository{
         return {
             fullTimes: fullTimes,
             lastRapTimes: lastRapTimes,
+            devLastRapTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.devLastRapTime),
+            devFullTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.devFullTime),
             horses: horses,
             counts: counts
         }
