@@ -7,7 +7,7 @@ import TimeChart from '../components/TimeChart'
 import StadiumRepository from '../repository/StadiumRepository';
 import Link from 'next/link';
 import BestTimeRepository from '../repository/BestTimeRepository';
-import {convertColorByScore} from'../util/color';
+import ResultColumn from '../components/ResultColumn';
 
 
 function convertTimes(minTimes,avgTimes){
@@ -45,29 +45,18 @@ function convertTimes(minTimes,avgTimes){
   }
 }
 
-function convertResult(lastRapTime,fullTime){
-  return (
-    <td>
-      <ul>
-        <li>出走数:{lastRapTime.count}</li>
-        <li>フルタイム最速:<span style={convertColorByScore(fullTime.devMin)}>{fullTime.devMin}</span></li>
-        <li>フルタイム平均:<span style={convertColorByScore(fullTime.devAvg)}>{fullTime.devAvg}</span></li>
-        <li>上がり最速:<span style={convertColorByScore(lastRapTime.devMin)}>{lastRapTime.devMin}</span></li>
-        <li>上がり平均:<span style={convertColorByScore(lastRapTime.devAvg)}>{lastRapTime.devAvg}</span></li>
-      </ul>
-  </td>
-  )
-}
-
 export async function getServerSideProps(context) {
   const racesResponse = await fetch("http://localhost:8080/v1/race/before")
-  const races = await racesResponse.json();
+  const races = await racesResponse.json()
   const raceId = context.query.raceId ? context.query.raceId : races[0].id
   const length = context.query.length ? context.query.length : races[0].raceLength
   const ranStadium = races[0].stadium
   const raceName = context.query.raceId ? races.find(race => race.id === Number(raceId)).raceName : races[0].raceName
   const raceCondition = context.query.raceCondition ? context.query.raceCondition : "良"
 
+
+  const lengthResponse = await fetch(`http://localhost:8080/v1/race/length?raceId=${raceId}`)
+  const lengths = await lengthResponse.json()
 
   const ranStadiums = await StadiumRepository.fetchRanStadium(raceId,length)
   let horses = [];
@@ -87,6 +76,7 @@ export async function getServerSideProps(context) {
       ranStadiums: ranStadiums,
       ranStadium: ranStadium,
       length: length,
+      lengths: lengths.length,
       raceId: raceId,
       raceCondition: raceCondition,
       raceName: raceName,
@@ -105,17 +95,19 @@ export default function Home(props) {
         <td>{props.horses[i].name}</td>
         {
           props.stadiumTimes.map(
-            (times) => times.fullTimes[i].count === 0 ? (<td>出走なし</td>) : (<td>{convertResult(times.fullTimes[i],times.lastRapTimes[i])}</td>)
+            (times) => times.fullTimes[i].count === 0 ? (<td>出走なし</td>) : (<td><ResultColumn fullTime={times.fullTimes[i]} lastRapTime={times.lastRapTimes[i]}/></td>)
           )
         }
       </tr>)
   }
   props.races.forEach(
-    race => races.push(<Link href={`?raceId=${race.id}&length=${race.raceLength}&stadium=${race.stadium}`} passHref><Dropdown.Item>{race.raceName}</Dropdown.Item></Link>)
+    race => races.push(<Link href={`?raceId=${race.id}`} passHref><Dropdown.Item>{race.raceName}</Dropdown.Item></Link>)
   )
   props.ranStadiums.forEach(
     stadium => stadiums.push(<Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${stadium}`} passHref><Dropdown.Item>{stadium}</Dropdown.Item></Link>)
   )
+  const lengths = props.lengths.map((length) => 
+    <Link href={`?raceId=${props.raceId}&length=${length}`} passHref><Dropdown.Item>{length}</Dropdown.Item></Link>)
   return (
     <dev>
       <Head>
@@ -158,6 +150,17 @@ export default function Home(props) {
               <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.ranStadium}&raceCondition=不良`} passHref>
                 <Dropdown.Item>不良</Dropdown.Item>
               </Link>
+            </Dropdown.Menu>
+          </Dropdown>
+        </ButtonGroup>
+        <ButtonGroup>
+          <Dropdown>
+            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+              {props.length}
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              {lengths}
             </Dropdown.Menu>
           </Dropdown>
         </ButtonGroup>
