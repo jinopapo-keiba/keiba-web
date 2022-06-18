@@ -49,7 +49,7 @@ export async function getServerSideProps(context) {
   const racesResponse = await fetch("http://localhost:8080/v1/race/before")
   const races = await racesResponse.json()
   const raceId = context.query.raceId ? context.query.raceId : races[0].id
-  const length = context.query.length ? context.query.length : races[0].raceLength
+  const length = context.query.length ? context.query.length : context.query.raceId ? races.find(race => race.id === Number(raceId)).raceLength : races[0].raceLength
   const ranStadium = races[0].stadium
   const raceName = context.query.raceId ? races.find(race => race.id === Number(raceId)).raceName : races[0].raceName
   const raceCondition = context.query.raceCondition ? context.query.raceCondition : "良"
@@ -67,7 +67,6 @@ export async function getServerSideProps(context) {
       horses = minTimes.horses
       stadiumTimes.push(convertTimes(minTimes,avgTimes))
   }
-
   return {
     props: {
       stadiumTimes: stadiumTimes,
@@ -107,7 +106,7 @@ export default function Home(props) {
     stadium => stadiums.push(<Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${stadium}`} passHref><Dropdown.Item>{stadium}</Dropdown.Item></Link>)
   )
   const lengths = props.lengths.map((length) => 
-    <Link href={`?raceId=${props.raceId}&length=${length}`} passHref><Dropdown.Item>{length}</Dropdown.Item></Link>)
+    <Link href={`?raceId=${props.raceId}&length=${length.raceLength}`} passHref><Dropdown.Item>{`${length.raceLength}(${length.count})`}</Dropdown.Item></Link>)
   return (
     <dev>
       <Head>
