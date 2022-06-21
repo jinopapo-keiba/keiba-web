@@ -21,8 +21,8 @@ function convertTimes(minTimes,avgTimes){
         name: minTimes.horses[i].name,
         min: minTimes.fullTimes.normalizedTimes[i] === 0 ? minFullTime.toFixed(1) : minTimes.fullTimes.normalizedTimes[i].toFixed(1),
         avg: avgTimes.fullTimes.normalizedTimes[i] === 0 ? minFullTime.toFixed(1) : avgTimes.fullTimes.normalizedTimes[i].toFixed(1),
-        devMin: minTimes.devFullTimes[i].toFixed(1),
-        devAvg: avgTimes.devFullTimes[i].toFixed(1),
+        devMin: minTimes.devFullTimes[i] > 0 ? minTimes.devFullTimes[i].toFixed(1) : 0,
+        devAvg: avgTimes.devFullTimes[i] > 0 ? avgTimes.devFullTimes[i].toFixed(1) : 0,
         count: minTimes.counts[i]
       }
     )
@@ -31,8 +31,8 @@ function convertTimes(minTimes,avgTimes){
         name: minTimes.horses[i].name,
         min: minTimes.lastRapTimes.normalizedTimes[i] === 0 ? minLastRapTime.toFixed(1) : minTimes.lastRapTimes.normalizedTimes[i].toFixed(1),
         avg: avgTimes.lastRapTimes.normalizedTimes[i] === 0 ? minLastRapTime.toFixed(1) : avgTimes.lastRapTimes.normalizedTimes[i].toFixed(1),
-        devMin: minTimes.devLastRapTimes[i].toFixed(1),
-        devAvg: avgTimes.devLastRapTimes[i].toFixed(1),
+        devMin: minTimes.devLastRapTimes[i] > 0 ? minTimes.devLastRapTimes[i].toFixed(1) : 0,
+        devAvg: avgTimes.devLastRapTimes[i] > 0 ? avgTimes.devLastRapTimes[i].toFixed(1) : 0,
         count: minTimes.counts[i]
       }
     )
