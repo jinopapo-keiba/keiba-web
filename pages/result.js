@@ -1,6 +1,7 @@
 import Head from "next/head"
 import { Container, Table } from "react-bootstrap"
 import RaceResultColumn from "../components/RaceResultColumn"
+import RaceResultTable from "../components/RaceResultTable"
 
 export async function getServerSideProps(context) {
     return {
@@ -35,15 +36,25 @@ export default function Home(props) {
                                 <th>5走前</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <td>1</td>
-                            <td>ディープインパクト</td>
-                            <RaceResultColumn />
-                            <RaceResultColumn />
-                            <RaceResultColumn />
-                            <RaceResultColumn />
-                            <RaceResultColumn />
-                        </tbody>
+                        <RaceResultTable horse={{
+                            results: [
+                                {
+                                    race: {
+                                        name: "皐月賞",
+                                        stadium: "阪神",
+                                        length: 2400,
+                                        raceType: "芝",
+                                        grade: "G1",
+                                        raceCondition: "良",
+                                        raceDate: "2022/01/01"
+                                    },
+                                    minTime: 55,
+                                    fullTime: 50
+                                }
+                            ],
+                            frameNumber: 1,
+                            name: "ディープインパクト"
+                        }} />
                     </Table>
                 </Container>
             </main>
