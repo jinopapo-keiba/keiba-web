@@ -1,12 +1,15 @@
 import Head from "next/head"
 import { Container, Table } from "react-bootstrap"
-import RaceResultColumn from "../components/RaceResultColumn"
 import RaceResultTable from "../components/RaceResultTable"
+import ResultReposiotry from "../repository/ResultReposiotry"
 
 export async function getServerSideProps(context) {
+    const horses = await ResultReposiotry.fetchResult(1234)
+    const maxResult = horses.reduce((max,now) => Math.max(max,now.results.length),0)
     return {
         props: {
-
+            maxResult: maxResult,
+            horses: horses
         }
     }
 }
@@ -29,32 +32,12 @@ export default function Home(props) {
                             <tr>
                                 <th>枠</th>
                                 <th>馬名</th>
-                                <th>1走前</th>
-                                <th>2走前</th>
-                                <th>3走前</th>
-                                <th>4走前</th>
-                                <th>5走前</th>
+                                {[...Array(props.maxResult).keys()].map(
+                                    (index) => (<th>{index+1}走前</th>)
+                                )}
                             </tr>
                         </thead>
-                        <RaceResultTable horse={{
-                            results: [
-                                {
-                                    race: {
-                                        name: "皐月賞",
-                                        stadium: "阪神",
-                                        length: 2400,
-                                        raceType: "芝",
-                                        grade: "G1",
-                                        raceCondition: "良",
-                                        raceDate: "2022/01/01"
-                                    },
-                                    minTime: 55,
-                                    fullTime: 50
-                                }
-                            ],
-                            frameNumber: 1,
-                            name: "ディープインパクト"
-                        }} />
+                        {props.horses.map((horse) => <RaceResultTable horse={horse} />)}
                     </Table>
                 </Container>
             </main>
