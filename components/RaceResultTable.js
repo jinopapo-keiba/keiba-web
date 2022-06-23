@@ -6,16 +6,16 @@ export default function RaceResultTable(props) {
         <tbody>
             <td>{props.horse.frameNumber}</td>
             <td>{props.horse.name}</td>
-            {props.horse.results.map(
-                (result) => {
-                    if(Object.keys(result).length === 0) {
+            {props.horse.raceResults.map(
+                (raceResult) => {
+                    if(Object.keys(raceResult).length === 0) {
                         return ("-")
                     }else{
                         return  (
                         <RaceResultColumn 
-                            fullTime={result.fullTime} 
-                            minTime={result.minTime} 
-                            race={result.race}/>
+                            fullTime={raceResult.result.devFullTime} 
+                            minTime={raceResult.result.devLastRapTime} 
+                            race={raceResult.race}/>
                         )
                     }
                 }
