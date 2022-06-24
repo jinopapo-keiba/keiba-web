@@ -4,7 +4,7 @@ import RaceResultTable from "../components/RaceResultTable"
 import ResultReposiotry from "../repository/ResultReposiotry"
 
 export async function getServerSideProps(context) {
-    const horses = await ResultReposiotry.fetchResult(1234)
+    const horses = await ResultReposiotry.fetchResult(context.query.raceId)
     const maxResult = horses.reduce((max,now) => Math.max(max,now.raceResults.length),0)
     return {
         props: {

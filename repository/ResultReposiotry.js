@@ -1,6 +1,6 @@
 class ResultRepository{
     async fetchResult(raceId) {
-        const response = await fetch(`http://localhost:8080/v1/raceResult/recent?=${raceId}`)
+        const response = await fetch(`http://localhost:8080/v1/race/recent?raceId=${raceId}`)
         const json = await response.json()
         return json;
     }
