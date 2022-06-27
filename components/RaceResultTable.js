@@ -14,7 +14,8 @@ export default function RaceResultTable(props) {
                         return  (
                         <RaceResultColumn 
                             fullTime={raceResult.result.devFullTime} 
-                            minTime={raceResult.result.devLastRapTime} 
+                            lastRapTime={raceResult.result.devLastRapTime} 
+                            ranking={raceResult.result.ranking}
                             race={raceResult.race}/>
                         )
                     }

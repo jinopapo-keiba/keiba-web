@@ -1,15 +1,19 @@
 import Head from "next/head"
+import Link from "next/link"
 import { Container, Table } from "react-bootstrap"
 import RaceResultTable from "../components/RaceResultTable"
+import RaceRepository from "../repository/RaceRepository"
 import ResultReposiotry from "../repository/ResultReposiotry"
 
 export async function getServerSideProps(context) {
-    const horses = await ResultReposiotry.fetchResult(context.query.raceId)
-    const maxResult = horses.reduce((max,now) => Math.max(max,now.raceResults.length),0)
+    const race = await RaceRepository.fetchRace(context.query.raceId)
+    const horses = await ResultReposiotry.fetchResult(context.query.raceId,context.query.raceLength,context.query.stadium)
+    const maxResult = horses.length > 0 ? horses.reduce((max,now) => Math.max(max,now.raceResults.length),0) : 0
     return {
         props: {
             maxResult: maxResult,
-            horses: horses
+            horses: horses,
+            race: race[0]
         }
     }
 }
@@ -26,8 +30,12 @@ export default function Home(props) {
 
 
             <main>
+                <Link href={`/result?raceId=${props.race.id}`} passHref>デフォルト</Link>
+                <Link href={`/result?raceId=${props.race.id}&stadium=${props.race.stadium}`} passHref>同競技場</Link>
+                <Link href={`/result?raceId=${props.race.id}&stadium=${props.race.stadium}&raceLength=${props.race.raceLength}`} passHref>同競技場同距離</Link>
                 <Container>
-                    <Table>
+                    <div className="table-responsive"> 
+                        <table className="table" style={{width: "max-content"}}>
                         <thead>
                             <tr>
                                 <th>枠</th>
@@ -38,7 +46,8 @@ export default function Home(props) {
                             </tr>
                         </thead>
                         {props.horses.map((horse) => <RaceResultTable horse={horse} />)}
-                    </Table>
+                        </table>
+                    </div>
                 </Container>
             </main>
         </dev>
