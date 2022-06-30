@@ -1,5 +1,6 @@
 import { Col, Container, Row } from 'react-bootstrap';
 import {convertColorByScore} from'../util/color';
+import { convertDateText } from '../util/string';
 
 export default function RaceResultColumn(props) {
     let backgroundColor
@@ -17,12 +18,17 @@ export default function RaceResultColumn(props) {
     return(
         <td style={{backgroundColor: backgroundColor,width: "270px"}}>
             <Row>
-                <Col xs={8}>{props.race.raceName}</Col>
+                <Col xs={8}>
+                    <div style={{marginTop: ".25rem"}}>
+                        <span className="h5">{props.race.stadium} {props.race.raceType}{props.race.raceLength}</span><span  style={{fontSize: "small"}}>{props.race.raceCondition}</span>
+                    </div>
+                </Col>
                 <Col xs={4}><span className="h3">{props.ranking}</span>着</Col>
             </Row>
             <Row style={{fontSize: "small"}}>
-                <Col xs={5}>{props.race.raceDate}</Col>
-                <Col xs={7}>{props.race.stadium} {props.race.raceType}{props.race.raceLength} {props.race.raceCondition}</Col>
+                <Col xs={5}>{convertDateText(props.race.raceDate)}</Col>
+                <Col>{props.race.raceName}</Col>
+                <Col xs={7}></Col>
             </Row>
             <Row>
                 <Col xs={5}><span style={{fontSize: "small"}}>上がり:</span><span style={convertColorByScore(props.lastRapTime)} className="h5">{props.lastRapTime > 0 ? props.lastRapTime.toFixed(1) : 0}</span></Col>

@@ -1,6 +1,6 @@
 import Head from "next/head"
 import Link from "next/link"
-import { Container, Table } from "react-bootstrap"
+import { Button, ButtonGroup, Container, Dropdown, Table } from "react-bootstrap"
 import RaceResultTable from "../components/RaceResultTable"
 import RaceRepository from "../repository/RaceRepository"
 import ResultReposiotry from "../repository/ResultReposiotry"
@@ -9,11 +9,14 @@ export async function getServerSideProps(context) {
     const race = await RaceRepository.fetchRace(context.query.raceId)
     const horses = await ResultReposiotry.fetchResult(context.query.raceId,context.query.raceLength,context.query.stadium)
     const maxResult = horses.length > 0 ? horses.reduce((max,now) => Math.max(max,now.raceResults.length),0) : 0
+    const racesResponse = await fetch("http://localhost:8080/v1/race/before")
+    const races = await racesResponse.json()
     return {
         props: {
             maxResult: maxResult,
             horses: horses,
-            race: race[0]
+            race: race[0],
+            races: races
         }
     }
 }
@@ -30,10 +33,22 @@ export default function Home(props) {
 
 
             <main>
-                <Link href={`/result?raceId=${props.race.id}`} passHref>デフォルト</Link>
-                <Link href={`/result?raceId=${props.race.id}&stadium=${props.race.stadium}`} passHref>同競技場</Link>
-                <Link href={`/result?raceId=${props.race.id}&stadium=${props.race.stadium}&raceLength=${props.race.raceLength}`} passHref>同競技場同距離</Link>
                 <Container>
+                    <ButtonGroup style={{padding: "1.5rem"}}>
+                        <Dropdown>
+                            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                                {props.race.raceName}
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                                {props.races.map(
+                                    (race) => (<Link href={`?raceId=${race.id}`} passHref><Dropdown.Item>{race.raceName}</Dropdown.Item></Link>)
+                                )}
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    </ButtonGroup>
+                    <Button variant="outline-dark" href={`/result?raceId=${props.race.id}`} passHref style={{marginLeft: "1rem"}}>絞り込みなし</Button>
+                    <Button variant="outline-dark" href={`/result?raceId=${props.race.id}&stadium=${props.race.stadium}`} passHref style={{marginLeft: "1rem"}}>同競技場</Button>
+                    <Button variant="outline-dark" href={`/result?raceId=${props.race.id}&stadium=${props.race.stadium}&raceLength=${props.race.raceLength}`} passHref style={{marginLeft: "1rem"}}>同競技場同距離</Button>
                     <div className="table-responsive"> 
                         <table className="table" style={{width: "max-content"}}>
                         <thead>
