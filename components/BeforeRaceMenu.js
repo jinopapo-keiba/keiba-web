@@ -31,14 +31,14 @@ export class BeforeRaceMenu extends React.Component {
                         </Dropdown.Menu>
                     </Dropdown>
                     <Dropdown style={{ padding: "1.5rem 1.5rem 1.5rem 0" }}>
-                        <Dropdown.Toggle variant="secondary" id="dropdown-basic"  style={{width: "200px"}}>
-                            {this.props.beforeRaces.races[this.state.stadium][this.state.round].name}
+                        <Dropdown.Toggle variant="secondary" id="dropdown-basic"  style={{width: "250px"}}>
+                            {this.props.beforeRaces.races[this.state.stadium][this.state.round - 1].name}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
                             {this.props.beforeRaces.races[this.state.stadium].map(
                                 (race) => (
                                 <Link href={`?raceId=${race.id}`} passHref>
-                                    <Dropdown.Item>{race.round + ":" + race.name}</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => { this.setState({ round: race.round })}}>{race.round + ":" + race.name}</Dropdown.Item>
                                 </Link>)
                             )}
                         </Dropdown.Menu>
