@@ -1,11 +1,19 @@
 import Link from "next/link"
-import { Col, Container, Dropdown, Nav, Navbar, Row, Tab, Table, Tabs } from "react-bootstrap"
+import { Col, Container, Nav, Navbar, Row, Tab, Tabs } from "react-bootstrap"
+import { BeforeRaceMenu } from "../components/BeforeRaceMenu"
 import RecentResult from "../components/RecentResult"
+import RaceRepository from "../repository/RaceRepository"
+import BeforeRaceService from "../service/BeforeRaceService"
 import RecentResultService from "../service/RecentResultService"
 
 export async function getServerSideProps(context) {
+    const race = await RaceRepository.fetchRace(context.query.raceId)
     return {
-        props: await RecentResultService.makeRecentResultDate(context.query.raceId,context.query.raceLength,context.query.stadium,context.query)
+        props: {
+            recentReuslt: await RecentResultService.makeRecentResultDate(context.query.raceId,context.query.raceLength,context.query.stadium,context.query),
+            beforeRaces: await BeforeRaceService.makeBeforeRace(),
+            race: race[0]
+        }
     }
 }
 
@@ -32,12 +40,13 @@ export default function Home(props) {
                     </Col>
                     <Col md={10}>
                         <Container style={{ maxWidth: "2000px" }}>
+                            <BeforeRaceMenu beforeRaces={props.beforeRaces} race={props.race} />
                             <Tabs defaultActiveKey="recent">
                                 <Tab eventKey="summary" title="総合評価">
 
                                 </Tab>
                                 <Tab eventKey="recent" title="直近レース">
-                                    <RecentResult {...props}/>
+                                    <RecentResult {...props.recentReuslt}/>
                                 </Tab>
                             </Tabs>
                         </Container>

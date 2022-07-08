@@ -5,19 +5,7 @@ import RaceResultTable from "./RaceResultTable";
 export default function RecentResult (props) {
     return (
         <>
-            <ButtonGroup style={{ padding: "1.5rem" }}>
-                <Dropdown>
-                    <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                        {props.race.raceName}
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                        {props.races.map(
-                            (race) => (<Link href={`?raceId=${race.id}`} passHref><Dropdown.Item>{race.raceName}</Dropdown.Item></Link>)
-                        )}
-                    </Dropdown.Menu>
-                </Dropdown>
-            </ButtonGroup>
-            <Card className="mb-3">
+            <Card className="m-3">
                 <Card.Header>
                     絞り込み条件
                 </Card.Header>
