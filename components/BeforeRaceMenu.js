@@ -8,11 +8,6 @@ export class BeforeRaceMenu extends React.Component {
         this.state ={
             stadium: props.race.stadium,
             round: props.race.round,
-            updateStadium: () => {
-                this.setState({
-                    stadium: "test"
-                })
-            }
        }
     }
 
