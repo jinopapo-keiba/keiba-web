@@ -1,0 +1,3 @@
+interface Color{
+    color :string
+}

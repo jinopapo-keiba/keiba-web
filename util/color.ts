@@ -1,4 +1,4 @@
-export function convertColorByScore(score){
+export function convertColorByScore(score: number): Color {
     if(score > 65){
         return {color:"fuchsia"}
     }else if(score > 60){
