@@ -27,7 +27,7 @@ export default function RecentResult (props) {
                             )}
                         </tr>
                     </thead>
-                    {props.horses.map((horse) => <RaceResultTable horse={horse} />)}
+                    {props.horses.map((horse,index) => <RaceResultTable horse={horse} raceHorse={props.race.raceHorses[index]}/>)}
                 </table>
             </div>
         </>
