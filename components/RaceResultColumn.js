@@ -1,5 +1,5 @@
 import { Col, Container, Row } from 'react-bootstrap';
-import {convertColorByScore} from'../util/color';
+import {convertColorByGrade, convertColorByScore} from'../util/color';
 import { convertDateText } from '../util/string';
 
 export default function RaceResultColumn(props) {
@@ -20,13 +20,13 @@ export default function RaceResultColumn(props) {
             <Row>
                 <Col xs={8}>
                     <div style={{marginTop: ".25rem"}}>
-                        <span className="h5">{props.race.stadium} {props.race.raceType}{props.race.raceLength}</span><span  style={{fontSize: "small"}}>{props.race.raceCondition}</span>
+                        <span className="h5" style={convertColorByGrade(props.race.grade)}>{props.race.stadium} {props.race.raceType}{props.race.raceLength} </span><span  style={{fontSize: "small"}}>{props.race.grade} {props.race.raceCondition}</span>
                     </div>
                 </Col>
-                <Col xs={4}><span className="h3">{props.ranking}</span>着</Col>
+                <Col xs={4}><span className="h3">{props.ranking}</span>着 </Col>
             </Row>
             <Row style={{fontSize: "small"}}>
-                <Col xs={5}>{convertDateText(props.race.raceDate)}</Col>
+                <Col xs={5}>{convertDateText(props.race.raceDate)} </Col>
                 <Col>{props.race.raceName}</Col>
                 <Col xs={7}></Col>
             </Row>

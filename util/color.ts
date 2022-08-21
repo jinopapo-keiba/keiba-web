@@ -13,3 +13,15 @@ export function convertColorByScore(score: number): Color {
         return {color:"silver"}
     }
 }
+
+export function convertColorByGrade(grade: string): Color {
+    if(grade === "G3"){
+        return {color:"green"}
+    }else if(grade === "G2"){
+        return {color:"red"}
+    }else if(grade === "G1"){
+        return {color:"blue"}
+    }else {
+        return {color:"black"}
+    }
+}

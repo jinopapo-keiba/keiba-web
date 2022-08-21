@@ -7,8 +7,8 @@ export class SummaryResult extends React.Component {
     render(){
         return (
             <>
-                <Container>
-                    <Table>
+                <dev className="table-responsive">
+                    <table className="table" style={{ width: "max-content" }}>
                         <thead>
                             <tr>
                                 <th>枠</th>
@@ -33,8 +33,8 @@ export class SummaryResult extends React.Component {
                                 </tr>
                             ))}
                         </tbody>
-                    </Table>
-                </Container>
+                    </table>
+                </dev>
             </>
         )
     }
