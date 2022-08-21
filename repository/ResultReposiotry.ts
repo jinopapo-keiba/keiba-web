@@ -1,5 +1,5 @@
 class ResultRepository{
-    async fetchResult(raceId,raceLength,stadium) {
+    async fetchResult(raceId: number,raceLength: number,stadium: string): Promise<HorseRecentResult[]>{
         let param = `raceId=${raceId}`
         if(raceLength) {
             param += `&raceLength=${raceLength}`
