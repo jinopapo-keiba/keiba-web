@@ -10,7 +10,7 @@ import SummaryResultService from "../service/SummaryResultService"
 
 export async function getServerSideProps(context) {
     const race = await RaceRepository.fetchRace(context.query.raceId)
-    const summaryResultPromise = SummaryResultService.makeSummaryResult(context.query.raceId,race[0].raceLength,"良")
+    const summaryResultPromise = SummaryResultService.makeSummaryResult(context.query.raceId,null,null)
     const recentReusltPromise =  RecentResultService.makeRecentResultDate(context.query.raceId,context.query.raceLength,context.query.stadium,context.query)
     const beforeRacesPromise = BeforeRaceService.makeBeforeRace()
     return {

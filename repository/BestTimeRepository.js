@@ -15,7 +15,7 @@ class BestTimeRepository{
         }
     }
 
-    async fetchBestTime(length,raceId,summaryType,stadium,raceCondition){
+    async fetchBestTime(length,raceId,stadium,raceCondition){
         const param = []
         if(length){
             param.push(`raceLength=${length}`)
@@ -26,17 +26,12 @@ class BestTimeRepository{
         if(raceId){
             param.push(`raceId=${raceId}`)
         }
-        if(summaryType){
-            param.push(`summaryType=${summaryType}`)
-        }
         if(raceCondition){
           param.push(`raceCondition=${raceCondition}`)
       }
 
         const response = await fetch(`http://localhost:8080/v1/raceResult/bestTime?${param.join("&")}`)
         const json = await response.json();
-        const fullTimes = this.normalizeTimes(json.bestRaceTimes.map(bestRaceTime => bestRaceTime.fullTime))
-        const lastRapTimes = this.normalizeTimes(json.bestRaceTimes.map(bestRaceTime => bestRaceTime.lastRapTime))
         const horses = json.bestRaceTimes.map(bestRaceTime => { 
             return {
               name: bestRaceTime.raceHorse.horse.name,
@@ -45,10 +40,10 @@ class BestTimeRepository{
           })
         const counts = json.bestRaceTimes.map(bestRaceTime => bestRaceTime.count)
         return {
-            fullTimes: fullTimes,
-            lastRapTimes: lastRapTimes,
-            devLastRapTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.devLastRapTime),
-            devFullTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.devFullTime),
+            bestFullTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.devBestFullTime),
+            avgFullTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.devAvgFullTime),
+            bestLastRapTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.devBestLastRapTime),
+            avgLastRapTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.devAvgLastRapTime),
             horses: horses,
             counts: counts
         }
