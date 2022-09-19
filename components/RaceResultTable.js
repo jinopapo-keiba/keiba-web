@@ -14,6 +14,8 @@ export default function RaceResultTable(props) {
                             <RaceResultColumn
                                 fullTime={raceResult.result.devFullTime}
                                 lastRapTime={raceResult.result.devLastRapTime}
+                                targetFullTime={raceResult.result.devTargetRaceFullTime}
+                                targetLastRapTime={raceResult.result.devTargetRaceLastRapTime}
                                 ranking={raceResult.result.ranking}
                                 race={raceResult.race} />
                         )

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Col, Container, Nav, Navbar, Row, Tab, Tabs } from "react-bootstrap"
+import { Button, Card, Col, Container, Nav, Navbar, Row, Tab, Tabs } from "react-bootstrap"
 import { BeforeRaceMenu } from "../components/BeforeRaceMenu"
 import RecentResult from "../components/RecentResult"
 import { SummaryResult } from "../components/SummeryResult"
@@ -10,7 +10,7 @@ import SummaryResultService from "../service/SummaryResultService"
 
 export async function getServerSideProps(context) {
     const race = await RaceRepository.fetchRace(context.query.raceId)
-    const summaryResultPromise = SummaryResultService.makeSummaryResult(context.query.raceId,null,null)
+    const summaryResultPromise = SummaryResultService.makeSummaryResult(context.query.raceId,context.query.raceLength,null)
     const recentReusltPromise =  RecentResultService.makeRecentResultDate(context.query.raceId,context.query.raceLength,context.query.stadium,context.query)
     const beforeRacesPromise = BeforeRaceService.makeBeforeRace()
     return {
@@ -18,7 +18,8 @@ export async function getServerSideProps(context) {
             recentReuslt: await recentReusltPromise,
             beforeRaces: await beforeRacesPromise,
             summaryResult: await summaryResultPromise,
-            race: race[0]
+            race: race[0],
+            requestParam: context.query
         }
     }
 }
@@ -47,6 +48,17 @@ export default function Home(props) {
                     <Col md={10}>
                         <Container style={{ maxWidth: "2000px" }}>
                             <BeforeRaceMenu beforeRaces={props.beforeRaces} race={props.race} />
+                            <Card className="m-3">
+                                <Card.Header>
+                                    絞り込み条件
+                                </Card.Header>
+                                <Card.Body>
+                                    <Button variant="outline-dark" href={`/result?raceId=${props.race.id}`} style={{ marginLeft: "1rem" }} active={!props.requestParam.stadium & !props.requestParam.raceLength}>絞り込みなし</Button>
+                                    <Button variant="outline-dark" href={`/result?raceId=${props.race.id}&stadium=${props.race.stadium}`} style={{ marginLeft: "1rem" }} active={!!props.requestParam.stadium & !props.requestParam.raceLength}>同競技場</Button>
+                                    <Button variant="outline-dark" href={`/result?raceId=${props.race.id}&raceLength=${props.race.raceLength}`} style={{ marginLeft: "1rem" }} active={!props.requestParam.stadium & !!props.requestParam.raceLength}>同距離</Button>
+                                    <Button variant="outline-dark" href={`/result?raceId=${props.race.id}&stadium=${props.race.stadium}&raceLength=${props.race.raceLength}`} style={{ marginLeft: "1rem" }} active={!!props.requestParam.stadium & !!props.requestParam.raceLength}>同競技場同距離</Button>
+                                </Card.Body>
+                            </Card>
                             <Tabs defaultActiveKey="recent">
                                 <Tab eventKey="summary" title="総合評価">
                                     <SummaryResult {...props.summaryResult}/>

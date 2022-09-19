@@ -4,10 +4,11 @@ import StadiumRepository from '../repository/StadiumRepository';
 class SummaryResultService {
     async makeSummaryResult(raceId,length,raceCondition){
         const ranStadiums = await StadiumRepository.fetchRanStadium(raceId,length)
-        const a = await BestTimeRepository.fetchBestTime(length,raceId,"中山",raceCondition)
-        const timesPromises = ranStadiums.map((ranStadium) => {
-            return BestTimeRepository.fetchBestTime(length,raceId,ranStadium,raceCondition)
-        });
+        let timesPromises = []
+        timesPromises.push(BestTimeRepository.fetchBestTime(length,raceId,null,raceCondition))
+        timesPromises = timesPromises.concat(ranStadiums.map((ranStadium) => {
+          return BestTimeRepository.fetchBestTime(length,raceId,ranStadium,raceCondition)
+        }))
         const stadiumTimes = await Promise.all(
             timesPromises.map(async (timesPromise) => {
                 const times = await timesPromise

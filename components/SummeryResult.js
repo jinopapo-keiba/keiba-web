@@ -13,6 +13,7 @@ export class SummaryResult extends React.Component {
                             <tr>
                                 <th>枠</th>
                                 <th>馬名</th>
+                                <th>全競技場</th>
                                 {this.props.ranStadiums.map(
                                     (stadium) => (<th className='sortable'>{`${stadium}`}</th>)
                                 )}
