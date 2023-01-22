@@ -7,7 +7,8 @@ export class BeforeRaceMenu extends React.Component {
         super(props);
         this.state ={
             stadium: props.race.stadium,
-            round: props.race.round,
+            race: props.race.raceName,
+            date: props.race.raceDate
        }
     }
 
@@ -15,25 +16,35 @@ export class BeforeRaceMenu extends React.Component {
         return (
             <>
                 <ButtonGroup>
+                <Dropdown style={{ padding: "1.5rem 1.5rem 1.5rem 0" }}>
+                        <Dropdown.Toggle variant="secondary" id="dropdown-basic" style={{width: "100px"}}>
+                            {this.state.date}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            {this.props.beforeRaces.dates.map(
+                                (date) => (<Dropdown.Item onClick={() => { this.setState({ date: date })}}>{date}</Dropdown.Item>)
+                            )}
+                        </Dropdown.Menu>
+                    </Dropdown>
                     <Dropdown style={{ padding: "1.5rem 1.5rem 1.5rem 0" }}>
                         <Dropdown.Toggle variant="secondary" id="dropdown-basic" style={{width: "100px"}}>
                             {this.state.stadium}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
-                            {this.props.beforeRaces.stadiums.map(
+                            {this.props.beforeRaces.stadiums[this.state.date].map(
                                 (stadium) => (<Dropdown.Item onClick={() => { this.setState({ stadium: stadium })}}>{stadium}</Dropdown.Item>)
                             )}
                         </Dropdown.Menu>
                     </Dropdown>
                     <Dropdown style={{ padding: "1.5rem 1.5rem 1.5rem 0" }}>
                         <Dropdown.Toggle variant="secondary" id="dropdown-basic"  style={{width: "250px"}}>
-                            {this.props.beforeRaces.races[this.state.stadium][this.state.round - 1].name}
+                            {this.state.race}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
-                            {this.props.beforeRaces.races[this.state.stadium].map(
+                            {this.props.beforeRaces.races[this.state.date][this.state.stadium].map(
                                 (race) => (
                                 <Link href={`?raceId=${race.id}`} passHref>
-                                    <Dropdown.Item onClick={() => { this.setState({ round: race.round })}}>{race.round + ":" + race.name}</Dropdown.Item>
+                                    <Dropdown.Item onClick={() => { this.setState({ race: race.name })}}>{race.round + ":" + race.name}</Dropdown.Item>
                                 </Link>)
                             )}
                         </Dropdown.Menu>

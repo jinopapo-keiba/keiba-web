@@ -44,6 +44,10 @@ class BestTimeRepository{
             avgFullTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.devAvgFullTime),
             bestLastRapTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.devBestLastRapTime),
             avgLastRapTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.devAvgLastRapTime),
+            raceBestFullTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.raceDevBestFullTime),
+            raceAvgFullTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.raceDevAvgFullTime),
+            raceBestLastRapTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.raceDevBestLastRapTime),
+            raceAvgLastRapTimes: json.bestRaceTimes.map(bestRaceTime => bestRaceTime.raceDevAvgLastRapTime),
             horses: horses,
             counts: counts
         }

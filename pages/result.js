@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button, Card, Col, Container, Nav, Navbar, Row, Tab, Tabs } from "react-bootstrap"
 import { BeforeRaceMenu } from "../components/BeforeRaceMenu"
+import { RaceDetail } from "../components/RaceDetail"
 import RecentResult from "../components/RecentResult"
 import { SummaryResult } from "../components/SummeryResult"
 import RaceRepository from "../repository/RaceRepository"
@@ -10,7 +11,7 @@ import SummaryResultService from "../service/SummaryResultService"
 
 export async function getServerSideProps(context) {
     const race = await RaceRepository.fetchRace(context.query.raceId)
-    const summaryResultPromise = SummaryResultService.makeSummaryResult(context.query.raceId,context.query.raceLength,null)
+    const summaryResultPromise = SummaryResultService.makeSummaryResult(race[0],context.query.raceId,context.query.raceLength,null)
     const recentReusltPromise =  RecentResultService.makeRecentResultDate(context.query.raceId,context.query.raceLength,context.query.stadium,context.query)
     const beforeRacesPromise = BeforeRaceService.makeBeforeRace()
     return {
@@ -48,6 +49,7 @@ export default function Home(props) {
                     <Col md={10}>
                         <Container style={{ maxWidth: "2000px" }}>
                             <BeforeRaceMenu beforeRaces={props.beforeRaces} race={props.race} />
+                            <RaceDetail race={props.race} />
                             <Card className="m-3">
                                 <Card.Header>
                                     絞り込み条件

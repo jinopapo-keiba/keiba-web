@@ -28,7 +28,7 @@ export class SummaryResult extends React.Component {
                                         this.props.stadiumTimes.map(
                                             (times) => times.fullTimes[index].count === 0 
                                             ? (<td>出走なし</td>) 
-                                            : (<td><ResultColumn fullTime={times.fullTimes[index]} lastRapTime={times.lastRapTimes[index]} /></td>)
+                                            : (<td><ResultColumn fullTime={times.fullTimes[index]} lastRapTime={times.lastRapTimes[index]} raceFullTime={times.raceFullTimes[index]} raceLastRapTime={times.raceLastRapTimes[index]} /></td>)
                                         )
                                     }
                                 </tr>

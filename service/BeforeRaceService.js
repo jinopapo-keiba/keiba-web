@@ -2,17 +2,28 @@ class BeforRaceService {
     async makeBeforeRace() {
         const racesResponse = await fetch("http://localhost:8080/v1/race/before")
         const raceModels = await racesResponse.json()
-        let stadiums = [];
+        let stadiums = {}
         let races = {}
+        let dates = []
         raceModels.forEach(raceModel => {
             const stadium = raceModel.stadium;
-            if(!stadiums.includes(stadium)){
-                stadiums.push(stadium)
+            const date = raceModel.raceDate;
+            if(!dates.includes(date)){
+                dates.push(date)
             }
-            if( races[stadium] == undefined ){
-                races[stadium] = []
+            if(stadiums[date] === undefined){
+                stadiums[date] = []
             }
-            races[stadium].push({
+            if(!stadiums[date].includes(stadium)){
+                stadiums[date].push(stadium)
+            }
+            if( races[date] == undefined ){
+                races[date] = {}
+            }
+            if( races[date][stadium] == undefined ){
+                races[date][stadium] = []
+            } 
+            races[date][stadium].push({
                 round: raceModel.round,
                 name: raceModel.raceName,
                 id: raceModel.id
@@ -20,7 +31,8 @@ class BeforRaceService {
         })
         return {
             races: races,
-            stadiums: stadiums
+            stadiums: stadiums,
+            dates: dates
         }
     }
 }
