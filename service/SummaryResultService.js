@@ -2,16 +2,17 @@ import BestTimeRepository from '../repository/BestTimeRepository';
 import StadiumRepository from '../repository/StadiumRepository';
 
 class SummaryResultService {
-    async makeSummaryResult(race,raceId,length,raceCondition){
+    async makeSummaryResult(race,raceId,length,stadiums,raceCondition){
         const ranStadiums = await StadiumRepository.fetchRanStadium(raceId,length)
-        const targetRanStadiums = ranStadiums.filter((ranStadium) =>{
-          return race.stadium === ranStadium
-        })
+        const targetRanStadiums = ranStadiums
+          .filter((ranStadium) => {
+            return race.stadium === ranStadium
+          })
         let timesPromises = []
-        timesPromises.push(BestTimeRepository.fetchBestTime(length,raceId,null,raceCondition))
+        timesPromises.push(BestTimeRepository.fetchBestTime(length,raceId,stadiums,raceCondition))
         timesPromises = timesPromises.concat(
           targetRanStadiums.map((ranStadium) => {
-              return BestTimeRepository.fetchBestTime(length,raceId,ranStadium,raceCondition)}
+              return BestTimeRepository.fetchBestTime(length,raceId,[ranStadium],raceCondition)}
           ))
         const stadiumTimes = await Promise.all(
             timesPromises.map(async (timesPromise) => {

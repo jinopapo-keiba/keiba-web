@@ -15,13 +15,13 @@ class BestTimeRepository{
         }
     }
 
-    async fetchBestTime(length,raceId,stadium,raceCondition){
+    async fetchBestTime(length,raceId,stadiums,raceCondition){
         const param = []
         if(length){
             param.push(`raceLength=${length}`)
         }
-        if(stadium){
-            param.push(`stadium=${stadium}`)
+        if(stadiums){
+            param.push(`stadiums=${stadiums.join(",")}`)
         }
         if(raceId){
             param.push(`raceId=${raceId}`)

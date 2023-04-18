@@ -2,9 +2,9 @@ import RaceRepository from "../repository/RaceRepository"
 import ResultReposiotry from "../repository/ResultReposiotry"
 
 class RecentResultService{
-    async makeRecentResultDate(raceId,raceLength,stadium,query) {
+    async makeRecentResultDate(raceId,raceLength,stadiums,query) {
         const race = await RaceRepository.fetchRace(raceId)
-        const horses = await ResultReposiotry.fetchResult(raceId,raceLength,stadium)
+        const horses = await ResultReposiotry.fetchResult(raceId,raceLength,stadiums)
         const maxResult = horses.length > 0 ? horses.reduce((max,now) => Math.max(max,now.raceResults.length),0) : 0
         return {
             maxResult: maxResult,
