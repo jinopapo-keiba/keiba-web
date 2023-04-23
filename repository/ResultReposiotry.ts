@@ -1,8 +1,11 @@
 class ResultRepository{
-    async fetchResult(raceId: number,raceLength: number,stadiums: string[]): Promise<HorseRecentResult[]>{
+    async fetchResult(raceId: number,minRaceLength: number,maxRaceLength: number,stadiums: string[]): Promise<HorseRecentResult[]>{
         let param = `raceId=${raceId}`
-        if(raceLength) {
-            param += `&raceLength=${raceLength}`
+        if(minRaceLength) {
+            param += `&minRaceLength=${minRaceLength}`
+        }
+        if(maxRaceLength) {
+            param += `&maxRaceLength=${maxRaceLength}`
         }
         if(stadiums) {
             param += `&stadiums=${stadiums.join(",")}`

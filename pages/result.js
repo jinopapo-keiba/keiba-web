@@ -13,8 +13,8 @@ export async function getServerSideProps(context) {
     const stadiumsParams = Array.isArray(context.query.stadiums) ? context.query.stadiums : [context.query.stadiums]
 
     const race = await RaceRepository.fetchRace(context.query.raceId)
-    const summaryResultPromise = SummaryResultService.makeSummaryResult(race[0],context.query.raceId,context.query.raceLength,stadiumsParams,null)
-    const recentReusltPromise =  RecentResultService.makeRecentResultDate(context.query.raceId,context.query.raceLength,stadiumsParams,context.query)
+    const summaryResultPromise = SummaryResultService.makeSummaryResult(race[0],context.query.raceId,context.query.minRaceLength,context.query.maxRaceLength,stadiumsParams,null)
+    const recentReusltPromise =  RecentResultService.makeRecentResultDate(context.query.raceId,context.query.minRaceLength,context.query.maxRaceLength,stadiumsParams,context.query)
     const beforeRacesPromise = BeforeRaceService.makeBeforeRace()
     const stadiums = ["札幌","函館","新潟","福島","東京","中山","中京","京都","阪神","小倉"]
     return {
@@ -60,10 +60,6 @@ export default function Home(props) {
                                 </Card.Header>
                                 <Card.Body>
                                     <Form action="/result" method="get">
-                                        <Button variant="outline-dark" href={`/result?raceId=${props.race.id}`} style={{ marginLeft: "1rem" }} active={!props.requestParam.stadium & !props.requestParam.raceLength}>絞り込みなし</Button>
-                                        <Button variant="outline-dark" href={`/result?raceId=${props.race.id}&stadium=${props.race.stadium}`} style={{ marginLeft: "1rem" }} active={!!props.requestParam.stadium & !props.requestParam.raceLength}>同競技場</Button>
-                                        <Button variant="outline-dark" href={`/result?raceId=${props.race.id}&raceLength=${props.race.raceLength}`} style={{ marginLeft: "1rem" }} active={!props.requestParam.stadium & !!props.requestParam.raceLength}>同距離</Button>
-                                        <Button variant="outline-dark" href={`/result?raceId=${props.race.id}&stadium=${props.race.stadium}&raceLength=${props.race.raceLength}`} style={{ marginLeft: "1rem" }} active={!!props.requestParam.stadium & !!props.requestParam.raceLength}>同競技場同距離</Button>
                                         <Form.Group className="mb-3">
                                             <h4>
                                                 競技場
@@ -74,8 +70,23 @@ export default function Home(props) {
                                                 ))
                                             }
                                         </Form.Group>
+                                        <Row className="mb-3">
+                                            <Form.Group as={Col} className="mb-3">
+                                                <h4>
+                                                    最短距離
+                                                </h4>
+                                                <Form.Control type="number" name="minRaceLength" defaultValue={props.requestParam.minRaceLength}/>
+                                            </Form.Group>
+                                            <Form.Group as={Col} className="mb-3">
+                                                <h4>
+                                                    最長距離
+                                                </h4>
+                                                <Form.Control type="number" name="maxRaceLength" defaultValue={props.requestParam.maxRaceLength}/>
+                                            </Form.Group>
+                                        </Row>
                                         <input name="raceId" value={props.race.id} hidden/>
-                                        <Button as="input" type="submit" variant="outline-dark" value="絞り込み"/>
+                                        <Button as="input" type="submit" variant="outline-dark" value="絞り込み" className="mr-3"/>
+                                        <Button href={`/result?raceId=${props.race.id}`} variant="outline-dark">リセット</Button>
                                     </Form>
                                 </Card.Body>
                             </Card>

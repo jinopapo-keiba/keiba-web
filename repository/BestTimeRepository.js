@@ -15,10 +15,13 @@ class BestTimeRepository{
         }
     }
 
-    async fetchBestTime(length,raceId,stadiums,raceCondition){
+    async fetchBestTime(minRaceLength,maxRaceLength,raceId,stadiums,raceCondition){
         const param = []
-        if(length){
-            param.push(`raceLength=${length}`)
+        if (minRaceLength) {
+            param.push(`minRaceLength=${minRaceLength}`)
+        }
+        if (maxRaceLength) {
+            param.push(`maxRaceLength=${maxRaceLength}`)
         }
         if(stadiums){
             param.push(`stadiums=${stadiums.join(",")}`)
