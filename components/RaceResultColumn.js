@@ -15,6 +15,9 @@ export default function RaceResultColumn(props) {
             backgroundColor =  "#efc79f"
             break
     }
+    if(props.score === 0) {
+        backgroundColor = ""
+    }
     return(
         <td style={{backgroundColor: backgroundColor,width: "270px"}}>
             <Row>
