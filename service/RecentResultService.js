@@ -12,13 +12,17 @@ class RecentResultService{
             horse.score = horseScore.score
             horse.rate = (horseScore.rate * 100).toFixed(1)
         })
+        const topHorse = horseScores.sort((now,next) => next.score - now.score).slice(0,5)
+        const maxHorse = horseScores.sort((now,next) => next.maxScore - now.maxScore).slice(0,3)
         const maxResult = horses.length > 0 ? horses.reduce((max,now) => Math.max(max,now.raceResults.length),0) : 0
         return {
             maxResult: maxResult,
             horses: horses,
             horseScore: horseScores,
             race: race[0],
-            requestParam: query
+            requestParam: query,
+            topHorse: topHorse,
+            maxHorse: maxHorse
         }
     }
 }

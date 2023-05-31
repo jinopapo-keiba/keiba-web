@@ -1,3 +1,4 @@
+import { Card } from "react-bootstrap";
 import RaceResultTable from "./RaceResultTable";
 
 export default function RecentResult (props) {
@@ -17,6 +18,26 @@ export default function RecentResult (props) {
                     {props.horses.map((horse,index) => <RaceResultTable horse={horse} raceHorse={props.race.raceHorses[index]}/>)}
                 </table>
             </div>
+            <Card className="m-3">
+                <Card.Header>
+                    軸馬
+                </Card.Header>
+                <Card.Body>
+                    <ul>
+                    {props.topHorse.map((horse) => <li>{horse.horseName}</li>)}
+                    </ul>
+                </Card.Body>
+            </Card>
+            <Card className="m-3">
+                <Card.Header>
+                    穴馬
+                </Card.Header>
+                <Card.Body>
+                    <ul>
+                    {props.maxHorse.map((horse) => <li>{horse.horseName}</li>)}
+                    </ul>
+                </Card.Body>
+            </Card>
         </>
     )
 }
