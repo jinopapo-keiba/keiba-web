@@ -1,197 +1,100 @@
-import Head from 'next/head'
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Container from 'react-bootstrap/Container';
-import { ButtonGroup, Col, Dropdown, Navbar, Row, Table } from 'react-bootstrap';
-import styles from '../styles/Home.module.css'
-import TimeChart from '../components/TimeChart'
-import StadiumRepository from '../repository/StadiumRepository';
-import Link from 'next/link';
-import BestTimeRepository from '../repository/BestTimeRepository';
-import ResultColumn from '../components/ResultColumn';
-
-
-function convertTimes(minTimes,avgTimes){
-  const fullTimes = []
-  const lastRapTimes = []
-  const minFullTime = Math.min(minTimes.fullTimes.minTime,avgTimes.fullTimes.minTime)
-  const minLastRapTime = Math.min(minTimes.lastRapTimes.minTime,avgTimes.lastRapTimes.minTime)
-  for(let i=0; i < minTimes.horses.length; i++){
-    fullTimes.push(
-      {
-        name: minTimes.horses[i].name,
-        min: minTimes.fullTimes.normalizedTimes[i] === 0 ? minFullTime.toFixed(1) : minTimes.fullTimes.normalizedTimes[i].toFixed(1),
-        avg: avgTimes.fullTimes.normalizedTimes[i] === 0 ? minFullTime.toFixed(1) : avgTimes.fullTimes.normalizedTimes[i].toFixed(1),
-        devMin: minTimes.devFullTimes[i] > 0 ? minTimes.devFullTimes[i].toFixed(1) : 0,
-        devAvg: avgTimes.devFullTimes[i] > 0 ? avgTimes.devFullTimes[i].toFixed(1) : 0,
-        count: minTimes.counts[i]
-      }
-    )
-    lastRapTimes.push(
-      {
-        name: minTimes.horses[i].name,
-        min: minTimes.lastRapTimes.normalizedTimes[i] === 0 ? minLastRapTime.toFixed(1) : minTimes.lastRapTimes.normalizedTimes[i].toFixed(1),
-        avg: avgTimes.lastRapTimes.normalizedTimes[i] === 0 ? minLastRapTime.toFixed(1) : avgTimes.lastRapTimes.normalizedTimes[i].toFixed(1),
-        devMin: minTimes.devLastRapTimes[i] > 0 ? minTimes.devLastRapTimes[i].toFixed(1) : 0,
-        devAvg: avgTimes.devLastRapTimes[i] > 0 ? avgTimes.devLastRapTimes[i].toFixed(1) : 0,
-        count: minTimes.counts[i]
-      }
-    )
-  }
-  return {
-    minFullTime: minFullTime,
-    fullTimes: fullTimes,
-    minLastRapTime: minLastRapTime,
-    lastRapTimes: lastRapTimes,
-  }
-}
+import Link from "next/link"
+import { Button, Card, Col, Container, Form, Nav, Navbar, Row, Tab, Tabs } from "react-bootstrap"
+import { BeforeRaceMenu } from "../components/BeforeRaceMenu"
+import { RaceDetail } from "../components/RaceDetail"
+import RecentResult from "../components/RecentResult"
+import RaceRepository from "../repository/RaceRepository"
+import BeforeRaceService from "../service/BeforeRaceService"
+import RecentResultService from "../service/RecentResultService"
 
 export async function getServerSideProps(context) {
-  const racesResponse = await fetch("http://localhost:8080/v1/race/before")
-  const races = await racesResponse.json()
-  const raceId = context.query.raceId ? context.query.raceId : races[0].id
-  const length = context.query.length ? context.query.length : context.query.raceId ? races.find(race => race.id === Number(raceId)).raceLength : races[0].raceLength
-  const ranStadium = races[0].stadium
-  const raceName = context.query.raceId ? races.find(race => race.id === Number(raceId)).raceName : races[0].raceName
-  const raceCondition = context.query.raceCondition ? context.query.raceCondition : "良"
+    const stadiumsParams = Array.isArray(context.query.stadiums) ? context.query.stadiums : [context.query.stadiums]
 
-
-  const lengthResponse = await fetch(`http://localhost:8080/v1/race/length?raceId=${raceId}`)
-  const lengths = await lengthResponse.json()
-
-  const ranStadiums = await StadiumRepository.fetchRanStadium(raceId,length)
-  let horses = [];
-  const stadiumTimes = []
-  for(let i = 0; i < ranStadiums.length; i++){
-      const minTimes = await BestTimeRepository.fetchBestTime(length,raceId,null,ranStadiums[i],raceCondition)
-      const avgTimes = await BestTimeRepository.fetchBestTime(length,raceId,"AVG",ranStadiums[i],raceCondition)
-      horses = minTimes.horses
-      stadiumTimes.push(convertTimes(minTimes,avgTimes))
-  }
-  return {
-    props: {
-      stadiumTimes: stadiumTimes,
-      horses: horses,
-      races: races,
-      ranStadiums: ranStadiums,
-      ranStadium: ranStadium,
-      length: length,
-      lengths: lengths.length,
-      raceId: raceId,
-      raceCondition: raceCondition,
-      raceName: raceName,
+    const race = await RaceRepository.fetchRace(context.query.raceId)
+    const recentReusltPromise =  RecentResultService.makeRecentResultDate(context.query.raceId,context.query.minRaceLength,context.query.maxRaceLength,stadiumsParams,context.query)
+    const beforeRacesPromise = BeforeRaceService.makeBeforeRace()
+    const stadiums = ["札幌","函館","新潟","福島","東京","中山","中京","京都","阪神","小倉"]
+    return {
+        props: {
+            recentReuslt: await recentReusltPromise,
+            beforeRaces: await beforeRacesPromise,
+            race: race[0],
+            requestParam: context.query,
+            stadiums: stadiums
+        }
     }
-  }
 }
 
 export default function Home(props) {
-  const horses = []
-  const races = []
-  const stadiums = []
-  for(let i=0; i < props.horses.length; i++){
-    horses.push(
-      <tr>
-        <td>{props.horses[i].frameNumber}</td>
-        <td>{props.horses[i].name}</td>
-        {
-          props.stadiumTimes.map(
-            (times) => times.fullTimes[i].count === 0 ? (<td>出走なし</td>) : (<td><ResultColumn fullTime={times.fullTimes[i]} lastRapTime={times.lastRapTimes[i]}/></td>)
-          )
-        }
-      </tr>)
-  }
-  props.races.forEach(
-    race => races.push(<Link href={`?raceId=${race.id}`} passHref><Dropdown.Item>{race.raceName}</Dropdown.Item></Link>)
-  )
-  props.ranStadiums.forEach(
-    stadium => stadiums.push(<Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${stadium}`} passHref><Dropdown.Item>{stadium}</Dropdown.Item></Link>)
-  )
-  const lengths = props.lengths.map((length) => 
-    <Link href={`?raceId=${props.raceId}&length=${length.raceLength}`} passHref><Dropdown.Item>{`${length.raceLength}(${length.count})`}</Dropdown.Item></Link>)
-  return (
-    <dev>
-      <Head>
-        <title>Umaaaaaa</title>
-        <meta name="description" content="Generated by create next app" />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous"></link>
-      </Head>
-
-
-      <main>
-        <Container>
-        <ButtonGroup>
-          <Dropdown>
-            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-              {props.raceName}
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu>
-              {races}
-            </Dropdown.Menu>
-          </Dropdown>
-        </ButtonGroup>
-        <ButtonGroup>
-          <Dropdown>
-            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-              {props.raceCondition}
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu>
-              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.ranStadium}&raceCondition=良`} passHref>
-                <Dropdown.Item>良</Dropdown.Item>
-              </Link>
-              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.ranStadium}&raceCondition=稍重`} passHref>
-                <Dropdown.Item>稍重</Dropdown.Item>
-              </Link>
-              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.ranStadium}&raceCondition=重`} passHref>
-                <Dropdown.Item>重</Dropdown.Item>
-              </Link>
-              <Link href={`?raceId=${props.raceId}&length=${props.length}&stadium=${props.ranStadium}&raceCondition=不良`} passHref>
-                <Dropdown.Item>不良</Dropdown.Item>
-              </Link>
-            </Dropdown.Menu>
-          </Dropdown>
-        </ButtonGroup>
-        <ButtonGroup>
-          <Dropdown>
-            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-              {props.length}
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu>
-              {lengths}
-            </Dropdown.Menu>
-          </Dropdown>
-        </ButtonGroup>
-        </Container>
-        <Container>
-          <Row>
-            <Col>
-              <TimeChart title={`${props.ranStadium}フルタイム`} data={props.stadiumTimes[0].fullTimes} dataMin={props.stadiumTimes[0].minFullTime}></TimeChart>
-            </Col>
-            <Col>
-              <TimeChart title={`${props.ranStadium}上がり`} data={props.stadiumTimes[0].lastRapTimes} dataMin={props.stadiumTimes[0].minLastRapTime} ></TimeChart>
-            </Col>
-          </Row>
-        </Container>
-        <Container>
-          <Table>
-            <thead>
-              <tr>
-                <th>枠</th>
-                <th>馬名</th>
-                {props.ranStadiums.map(
-                  (stadium) => (<th className='sortable'>{`${stadium}`}</th>)
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {horses}
-            </tbody>
-          </Table>
-        </Container>
-      </main>
-
-    </dev>
-  )
+    return(
+        <>
+            <main>
+                <Row>
+                    <Col md={2} className={"bg-dark"}>
+                        <Navbar variant="dark">
+                            <Nav className="flex-column">
+                                <Link href="/analytics" passHref>
+                                    <Nav.Link>
+                                        過去レース分析
+                                    </Nav.Link>
+                                </Link>
+                                <Link href="/" passHref>
+                                    <Nav.Link>
+                                        開催レース分析
+                                    </Nav.Link>
+                                </Link>
+                            </Nav>
+                        </Navbar>
+                    </Col>
+                    <Col md={10}>
+                        <Container style={{ maxWidth: "2000px" }}>
+                            <BeforeRaceMenu beforeRaces={props.beforeRaces} race={props.race} />
+                            <RaceDetail race={props.race} />
+                            <Card className="m-3">
+                                <Card.Header>
+                                    絞り込み条件
+                                </Card.Header>
+                                <Card.Body>
+                                    <Form action="/result" method="get">
+                                        <Form.Group className="mb-3">
+                                            <h4>
+                                                競技場
+                                            </h4>
+                                            {
+                                                props.stadiums.map((stadium, index) => (
+                                                    <Form.Check inline label={stadium} id={`stadium${index}`} name="stadiums" value={stadium} defaultChecked={!!props.requestParam.stadiums && props.requestParam.stadiums.includes(stadium)}/>
+                                                ))
+                                            }
+                                        </Form.Group>
+                                        <Row className="mb-3">
+                                            <Form.Group as={Col} className="mb-3">
+                                                <h4>
+                                                    最短距離
+                                                </h4>
+                                                <Form.Control type="number" name="minRaceLength" defaultValue={props.requestParam.minRaceLength}/>
+                                            </Form.Group>
+                                            <Form.Group as={Col} className="mb-3">
+                                                <h4>
+                                                    最長距離
+                                                </h4>
+                                                <Form.Control type="number" name="maxRaceLength" defaultValue={props.requestParam.maxRaceLength}/>
+                                            </Form.Group>
+                                        </Row>
+                                        <input name="raceId" value={props.race.id} hidden/>
+                                        <Button as="input" type="submit" variant="outline-dark" value="絞り込み" className="mr-3"/>
+                                        <Button href={`/result?raceId=${props.race.id}`} variant="outline-dark">リセット</Button>
+                                    </Form>
+                                </Card.Body>
+                            </Card>
+                            <Tabs defaultActiveKey="recent">
+                                <Tab eventKey="recent" title="直近レース">
+                                    <RecentResult {...props.recentReuslt}/>
+                                </Tab>
+                            </Tabs>
+                        </Container>
+                    </Col>
+                </Row>
+            </main>
+        </>
+    )
 }
