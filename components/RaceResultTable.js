@@ -17,11 +17,11 @@ export default function RaceResultTable(props) {
                     (raceResult) => {
                         return (
                             <RaceResultColumn
-                                fullTime={raceResult.result.devFullTime}
-                                lastRapTime={raceResult.result.devLastRapTime}
-                                targetFullTime={raceResult.result.devTargetRaceFullTime}
-                                targetLastRapTime={raceResult.result.devTargetRaceLastRapTime}
-                                ranking={raceResult.result.ranking}
+                                fullTime={raceResult.raceHorse.raceResult.devFullTime}
+                                lastRapTime={raceResult.raceHorse.raceResult.devLastRapTime}
+                                targetFullTime={raceResult.raceHorse.raceResult.devTargetRaceFullTime}
+                                targetLastRapTime={raceResult.raceHorse.raceResult.devTargetRaceLastRapTime}
+                                ranking={raceResult.raceHorse.raceResult.ranking}
                                 race={raceResult.race}
                                 score={props.horse.score} />
                         )
