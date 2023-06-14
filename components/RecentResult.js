@@ -28,16 +28,6 @@ export default function RecentResult (props) {
                     </ul>
                 </Card.Body>
             </Card>
-            <Card className="m-3">
-                <Card.Header>
-                    穴馬
-                </Card.Header>
-                <Card.Body>
-                    <ul>
-                    {props.maxHorse.map((horse) => <li>{horse.horseName}</li>)}
-                    </ul>
-                </Card.Body>
-            </Card>
         </>
     )
 }
