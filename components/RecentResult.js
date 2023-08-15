@@ -24,7 +24,6 @@ export default function RecentResult (props) {
                 </Card.Header>
                 <Card.Body>
                     <ul>
-                    {props.topHorse.map((horse) => <li>{horse.horseName}</li>)}
                     </ul>
                 </Card.Body>
             </Card>

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Button, Card, Col, Container, Form, Nav, Navbar, Row, Tab, Tabs } from "react-bootstrap"
+import { Button, Card, Col, Container, Form, Nav, Navbar, Row, SSRProvider, Tab, Tabs } from "react-bootstrap"
 import { BeforeRaceMenu } from "../components/BeforeRaceMenu"
 import { RaceDetail } from "../components/RaceDetail"
 import RecentResult from "../components/RecentResult"
@@ -27,7 +27,7 @@ export async function getServerSideProps(context) {
 
 export default function Home(props) {
     return(
-        <>
+        <SSRProvider>
             <main>
                 <Row>
                     <Col md={2} className={"bg-dark"}>
@@ -55,7 +55,7 @@ export default function Home(props) {
                                     絞り込み条件
                                 </Card.Header>
                                 <Card.Body>
-                                    <Form action="/result" method="get">
+                                    <Form action="/" method="get">
                                         <Form.Group className="mb-3">
                                             <h4>
                                                 競技場
@@ -80,9 +80,9 @@ export default function Home(props) {
                                                 <Form.Control type="number" name="maxRaceLength" defaultValue={props.requestParam.maxRaceLength}/>
                                             </Form.Group>
                                         </Row>
-                                        <input name="raceId" value={props.race.id} hidden/>
+                                        <input name="raceId" defaultValue={props.race.id} hidden/>
                                         <Button as="input" type="submit" variant="outline-dark" value="絞り込み" className="mr-3"/>
-                                        <Button href={`/result?raceId=${props.race.id}`} variant="outline-dark">リセット</Button>
+                                        <Button href={`?raceId=${props.race.id}`} variant="outline-dark">リセット</Button>
                                     </Form>
                                 </Card.Body>
                             </Card>
@@ -95,6 +95,6 @@ export default function Home(props) {
                     </Col>
                 </Row>
             </main>
-        </>
+        </SSRProvider>
     )
 }
