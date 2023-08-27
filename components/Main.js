@@ -6,6 +6,7 @@ import { RaceDetail } from "./RaceDetail";
 import RecentResult from "./RecentResult";
 import { useState } from 'react';
 import { useRouter } from "next/router";
+import RaceInfoForm from "./RaceInfoForm";
 
 export default function Main({beforeRaces,race,stadiums,requestParam,recentResult}) {
     const [loadingFlag, setLoadingFlag] = useState(false);
@@ -72,6 +73,7 @@ export default function Main({beforeRaces,race,stadiums,requestParam,recentResul
                 </Form>
             </Card.Body>
         </Card>
+        <RaceInfoForm raceCondition={requestParam.raceCondition} race={race}/>
         <Tabs defaultActiveKey="recent">
             <Tab eventKey="recent" title="直近レース">
                 <RecentResult {...recentResult} />
