@@ -4,7 +4,7 @@ import RaceResultColumn from "./RaceResultColumn";
 export default function RaceResultTable(props) {
     const backgroundColor = props.horse.score === 0 ? "#C0C0C0" : ""
     return(
-        <tbody style={{"background-color": backgroundColor}}>
+        <tbody style={{"backgroundColor?": backgroundColor}}>
             <td>{props.horse.frameNumber}</td>
             <td>
                 {props.horse.name}({props.raceHorse.old}歳)
