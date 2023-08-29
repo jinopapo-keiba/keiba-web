@@ -8,7 +8,7 @@ export default function RaceResultTable(props) {
             <td>{props.horse.frameNumber}</td>
             <td>
                 {props.horse.name}({props.raceHorse.old}歳)
-                <Row>馬スコア：{props.horse.score}</Row>
+                <Row>予想連帯率：{props.horse.score}</Row>
             </td>
             {props.horse.raceResults.length === 0 ?
                 <td>出走経験なし</td> : 

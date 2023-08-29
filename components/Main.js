@@ -7,6 +7,7 @@ import RecentResult from "./RecentResult";
 import { useState } from 'react';
 import { useRouter } from "next/router";
 import RaceInfoForm from "./RaceInfoForm";
+import RecommendHorse from "./RecommendHorse";
 
 export default function Main({beforeRaces,race,stadiums,requestParam,recentResult}) {
     const [loadingFlag, setLoadingFlag] = useState(false);
@@ -37,6 +38,7 @@ export default function Main({beforeRaces,race,stadiums,requestParam,recentResul
         <>
         <BeforeRaceMenu beforeRaces={beforeRaces} race={race} />
         <RaceDetail race={race} />
+        <RecommendHorse recommendHorse={recentResult.topHorse}/>
         <Card className="m-3">
             <Card.Header>
                 絞り込み条件
