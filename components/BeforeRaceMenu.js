@@ -13,6 +13,12 @@ export class BeforeRaceMenu extends React.Component {
     }
 
     render() {
+        let races
+        if(this.props.beforeRaces.races[this.state.date][this.state.stadium]) {
+            races = this.props.beforeRaces.races[this.state.date][this.state.stadium]
+        } else {
+            races = this.props.beforeRaces.races[this.state.date][Object.keys(this.props.beforeRaces.races[this.state.date])[0]]
+        }
         return (
             <>
                 <ButtonGroup>
@@ -41,7 +47,8 @@ export class BeforeRaceMenu extends React.Component {
                             {this.state.race}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
-                            {this.props.beforeRaces.races[this.state.date][this.state.stadium].map(
+                            {
+                            races.map(
                                 (race) => (
                                 <Link href={`?raceId=${race.id}`} passHref>
                                     <Dropdown.Item onClick={() => { this.setState({ race: race.name })}}>{race.round + ":" + race.name}</Dropdown.Item>
