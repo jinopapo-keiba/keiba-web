@@ -39,6 +39,11 @@ export default function Main({beforeRaces,race,stadiums,requestParam,recentResul
         <BeforeRaceMenu beforeRaces={beforeRaces} race={race} />
         <RaceDetail race={race} />
         <RecommendHorse recommendHorse={recentResult.topHorse}/>
+        <Tabs defaultActiveKey="recent">
+            <Tab eventKey="recent" title="直近レース">
+                <RecentResult {...recentResult} />
+            </Tab>
+        </Tabs>
         <Card className="m-3">
             <Card.Header>
                 絞り込み条件
@@ -76,11 +81,6 @@ export default function Main({beforeRaces,race,stadiums,requestParam,recentResul
             </Card.Body>
         </Card>
         <RaceInfoForm raceCondition={requestParam.raceCondition} race={race}/>
-        <Tabs defaultActiveKey="recent">
-            <Tab eventKey="recent" title="直近レース">
-                <RecentResult {...recentResult} />
-            </Tab>
-        </Tabs>
         </>
     )
 

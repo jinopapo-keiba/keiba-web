@@ -7,8 +7,9 @@ export default function RaceResultTable(props) {
         <tbody style={{"backgroundColor?": backgroundColor}}>
             <td>{props.horse.frameNumber}</td>
             <td>
-                {props.horse.name}({props.raceHorse.old}歳)
-                <Row>予想連帯率：{props.horse.score}</Row>
+                <Row>{props.horse.name}({props.raceHorse.old}歳)</Row>
+                <Row>騎手：{props.raceHorse.jockey.name}</Row>
+                <Row>予想単勝率：{props.horse.score}</Row>
             </td>
             {props.horse.raceResults.length === 0 ?
                 <td>出走経験なし</td> : 

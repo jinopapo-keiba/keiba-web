@@ -9,7 +9,7 @@ export default function RecommendHorse({recommendHorse}) {
                 </Card.Header>
                 <Card.Body>
                     <ul>
-                        {recommendHorse.map((horse) => <li>連帯率：{horse.score.toFixed(1)}% {horse.horseName}</li>)}
+                        {recommendHorse.map((horse) => <li>単勝率：{horse.score.toFixed(1)}% {horse.frameNumber}枠：{horse.horseName}</li>)}
                     </ul>
                 </Card.Body>
             </Card>
