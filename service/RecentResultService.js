@@ -12,6 +12,7 @@ class RecentResultService{
             horse.score = horseScore.score.toFixed(1)
         })
         const topHorse = horseScores.sort((now,next) => next.score - now.score).slice(0,6)
+        const confidentFlag = topHorse[0].score > 20 && topHorse[0].score - topHorse[1].score > 5
         const maxResult = horses.length > 0 ? horses.reduce((max,now) => Math.max(max,now.raceResults.length),0) : 0
         return {
             maxResult: maxResult,
@@ -20,6 +21,7 @@ class RecentResultService{
             race: race[0],
             requestParam: query,
             topHorse: topHorse,
+            confidentFlag: confidentFlag,
         }
     }
 }
