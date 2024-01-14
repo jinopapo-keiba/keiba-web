@@ -38,7 +38,7 @@ export default function Main({beforeRaces,race,stadiums,requestParam,recentResul
         <>
         <BeforeRaceMenu beforeRaces={beforeRaces} race={race} />
         <RaceDetail race={race} />
-        <RecommendHorse recommendHorse={recentResult.topHorse}/>
+        <RecommendHorse recommendHorse={recentResult.topHorse} confidentFlag={recentResult.confidentFlag}/>
         <Tabs defaultActiveKey="recent">
             <Tab eventKey="recent" title="直近レース">
                 <RecentResult {...recentResult} />
