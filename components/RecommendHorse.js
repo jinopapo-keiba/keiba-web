@@ -1,11 +1,11 @@
-import { Card } from "react-bootstrap";
+import { Badge, Card } from "react-bootstrap";
 
-export default function RecommendHorse({recommendHorse,confidentFlag}) {
+export default function RecommendHorse({recommendHorse,confidentFlag,buyFlag}) {
     return (
         <>
             <Card className="m-3">
                 <Card.Header>
-                    おすすめの馬 {confidentFlag ? "自信あり" : ""}
+                    おすすめの馬 {confidentFlag && !buyFlag ? <Badge bg="warning">自信あり</Badge> : ""} {buyFlag ? <Badge bg="danger">買い</Badge> : ""} 
                 </Card.Header>
                 <Card.Body>
                     <ul>
