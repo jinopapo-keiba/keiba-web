@@ -20,8 +20,7 @@ class RecentResultService{
             race: race[0],
             requestParam: query,
             topHorse: topHorse,
-            confidentFlag: horseScores.confident.confidentFlag,
-            buyFlag: horseScores.confident.buyFlag,
+            confident: horseScores.confident,
         }
     }
 }
